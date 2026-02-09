@@ -2,7 +2,6 @@
 import React from 'react'
 import Link from 'next/link';
 import { useCategories } from '@/features/categories/hooks';
-import Image from 'next/image';
 import CategoryCard from '@/app/_components/CategoryCard';
 
 import { isDevMode } from "@/lib/constant";

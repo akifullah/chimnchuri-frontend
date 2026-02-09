@@ -1,5 +1,7 @@
 import React from 'react'
 import { isDevMode } from "@/lib/constant";
+import Image from 'next/image';
+
 
 const Img = ({ src = "", width = "100%", height = "100%", alt = "", className = "", others = {} }) => {
     return (
