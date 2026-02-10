@@ -16,7 +16,6 @@ const RegistrationForm = () => {
         try {
             // API call here
             const res = await registerApi(data);
-            console.log(res);
         } catch (error) {
             console.error('Registration failed:', error);
         } finally {

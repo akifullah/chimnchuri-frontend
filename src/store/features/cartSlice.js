@@ -3,10 +3,12 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 
+
 const initialState = {
     items: [], // Array of cart items
     totalItems: 0,
     totalPrice: 0,
+    isCartOpen: false,
 };
 
 const cartSlice = createSlice({
@@ -16,8 +18,10 @@ const cartSlice = createSlice({
         addToCart: (state, action) => {
             const { item, selectedSize, selectedAddons, quantity, addonGroups } = action.payload;
 
-            // Calculate addon price
-            let addonPrice = 0;
+            // Process addons into a structured array
+            let processedAddons = [];
+            let addonTotal = 0;
+
             if (selectedAddons && addonGroups) {
                 Object.entries(selectedAddons).forEach(([groupId, addonIds]) => {
                     const group = addonGroups.find(g => g.id === parseInt(groupId));
@@ -25,7 +29,19 @@ const cartSlice = createSlice({
                         addonIds.forEach(addonId => {
                             const addon = group.items.find(a => a.id === addonId);
                             if (addon) {
-                                addonPrice += addon.price;
+                                let price = parseFloat(addon.price);
+                                if (!price || price === 0) {
+                                    price = parseFloat(addon.addon_item?.price) || 0;
+                                }
+                                processedAddons.push({
+                                    id: addon.id,
+                                    name: addon.addon_item.name,
+                                    price: price,
+                                    qty: 1, // Default quantity for addons
+                                    category: group.addon_category.name,
+                                    groupId: group.id
+                                });
+                                addonTotal += price;
                             }
                         });
                     }
@@ -33,7 +49,7 @@ const cartSlice = createSlice({
             }
 
             // Calculate total price for this item
-            const itemTotal = (parseFloat(selectedSize.price) + addonPrice) * quantity;
+            const itemTotal = (parseFloat(selectedSize.price) + addonTotal) * quantity;
 
             // Create cart item object
             const cartItem = {
@@ -47,36 +63,16 @@ const cartSlice = createSlice({
                     name: selectedSize.name,
                     price: selectedSize.price,
                 },
-                selectedAddons: selectedAddons || {},
-                addonDetails: [], // Store full addon details for display
+                selectedAddons: processedAddons, // Store the structured array
                 quantity,
                 itemTotal,
             };
-
-            // Populate addon details for display
-            if (selectedAddons && addonGroups) {
-                Object.entries(selectedAddons).forEach(([groupId, addonIds]) => {
-                    const group = addonGroups.find(g => g.id === parseInt(groupId));
-                    if (group) {
-                        addonIds.forEach(addonId => {
-                            const addon = group.items.find(a => a.id === addonId);
-                            if (addon) {
-                                cartItem.addonDetails.push({
-                                    id: addon.id,
-                                    name: addon.addon_item.name,
-                                    price: addon.price,
-                                    category: group.addon_category_id,
-                                });
-                            }
-                        });
-                    }
-                });
-            }
 
             // Add to cart
             state.items.push(cartItem);
             state.totalItems += quantity;
             state.totalPrice += itemTotal;
+            // state.isCartOpen = true; // Open cart when adding
 
             localStorage.setItem("cartItems", JSON.stringify({
                 items: state.items,
@@ -93,6 +89,12 @@ const cartSlice = createSlice({
                 state.totalItems -= item.quantity;
                 state.totalPrice -= item.itemTotal;
                 state.items = state.items.filter(item => item.id !== itemId);
+
+                localStorage.setItem("cartItems", JSON.stringify({
+                    items: state.items,
+                    totalItems: state.totalItems,
+                    totalPrice: state.totalPrice
+                }));
             }
         },
 
@@ -110,6 +112,12 @@ const cartSlice = createSlice({
 
                 item.quantity = quantity;
                 item.itemTotal = newTotal;
+
+                localStorage.setItem("cartItems", JSON.stringify({
+                    items: state.items,
+                    totalItems: state.totalItems,
+                    totalPrice: state.totalPrice
+                }));
             }
         },
 
@@ -117,6 +125,7 @@ const cartSlice = createSlice({
             state.items = [];
             state.totalItems = 0;
             state.totalPrice = 0;
+            localStorage.removeItem("cartItems");
         },
 
         incrementQuantity: (state, action) => {
@@ -129,6 +138,12 @@ const cartSlice = createSlice({
                 item.itemTotal += pricePerItem;
                 state.totalItems += 1;
                 state.totalPrice += pricePerItem;
+
+                localStorage.setItem("cartItems", JSON.stringify({
+                    items: state.items,
+                    totalItems: state.totalItems,
+                    totalPrice: state.totalPrice
+                }));
             }
         },
 
@@ -142,20 +157,21 @@ const cartSlice = createSlice({
                 item.itemTotal -= pricePerItem;
                 state.totalItems -= 1;
                 state.totalPrice -= pricePerItem;
+
+                localStorage.setItem("cartItems", JSON.stringify({
+                    items: state.items,
+                    totalItems: state.totalItems,
+                    totalPrice: state.totalPrice
+                }));
             }
         },
         initializeCart: (state, action) => {
-            console.log(action.payload);
             state.items = action.payload.items;
             state.totalItems = action.payload.totalItems;
             state.totalPrice = action.payload.totalPrice;
-
-            // localStorage.setItem("cartItems", JSON.stringify({
-            //     items: state.items,
-            //     totalItems: state.totalItems,
-            //     totalPrice: state.totalPrice
-            // }));
-
+        },
+        toggleCart: (state, action) => {
+            state.isCartOpen = action.payload !== undefined ? action.payload : !state.isCartOpen;
         }
 
     },
@@ -169,6 +185,7 @@ export const {
     incrementQuantity,
     decrementQuantity,
     initializeCart,
+    toggleCart,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

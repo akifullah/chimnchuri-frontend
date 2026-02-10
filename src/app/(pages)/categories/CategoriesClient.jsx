@@ -10,7 +10,6 @@ import { isDevMode } from "@/lib/constant";
 const CategoriesClient = () => {
     const { data, isLoading, error } = useCategories();
 
-    console.log(error);
     if (isLoading) return <div>Loading...</div>;
 
     if (error) return <div>Error loading categories</div>;

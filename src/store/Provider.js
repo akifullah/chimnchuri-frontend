@@ -14,7 +14,6 @@ export default function ReduxProvider({ children }) {
 
     useEffect(() => {
         let cartItems = localStorage.getItem("cartItems") ? JSON.parse(localStorage.getItem("cartItems")) : null;
-        console.log(cartItems)
         if (storeRef.current && cartItems) {
             storeRef.current.dispatch(initializeCart(cartItems))
         }

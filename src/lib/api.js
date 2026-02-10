@@ -6,7 +6,6 @@ import { apiClient } from "./apiClient";
 
 
 export const registerApi = async (data) => {
-    console.log(data);
     const res = await apiClient("/register", {
         method: "POST",
         body: JSON.stringify(data)

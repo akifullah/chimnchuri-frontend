@@ -1,15 +1,17 @@
 "use client"
-import Image from 'next/image'
 import React, { useState } from 'react'
-import logo from "../../../public/logo-light.png"
+import Image from 'next/image'
 import Link from 'next/link'
 import { FaBars, FaCarAlt, FaCartPlus, FaTimes, FaUser } from 'react-icons/fa'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import SidebarCart from './SidebarCart'
+import { toggleCart } from '@/store/features/cartSlice'
 
 const Header = () => {
-    const [isOpenMobileNav, setIsOpenMobileNav] = useState();
+    const [isOpenMobileNav, setIsOpenMobileNav] = useState(false);
+    const dispatch = useDispatch();
 
-    const {items, totalItems, totalPrice} = useSelector((state)=>state.cartSlice); 
+    const { items, totalItems, totalPrice } = useSelector((state) => state.cartSlice);
 
     const toggleMobileNav = () => {
         setIsOpenMobileNav(!isOpenMobileNav);
@@ -17,6 +19,7 @@ const Header = () => {
 
     return (
         <>
+            <SidebarCart />
             <header className='px-2 py-4 xl:px-28 bg-brand text-white'>
                 <div className="container mx-auto flex items-center justify-between">
 
@@ -38,12 +41,15 @@ const Header = () => {
                             <FaUser size={20} /> Sign in
                         </Link>
 
-                        <button className='flex items-center gap-2 relative cursor-pointer'>
+                        <button
+                            onClick={() => dispatch(toggleCart(true))}
+                            className='flex items-center gap-2 relative cursor-pointer'
+                        >
                             <span
                                 className='absolute left-2 -top-4 size-5 text-xs rounded-full flex items-center justify-center bg-white text-brand font-bold '
                             >{totalItems}</span>
                             <FaCartPlus size={20} />
-                            <span>Rs {totalPrice}</span>
+                            <span>Rs {totalPrice.toFixed(2)}</span>
                         </button>
 
                         <button onClick={toggleMobileNav} className='block lg:hidden cursor-pointer text-xl'>
