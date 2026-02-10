@@ -4,9 +4,12 @@ import React, { useState } from 'react'
 import logo from "../../../public/logo-light.png"
 import Link from 'next/link'
 import { FaBars, FaCarAlt, FaCartPlus, FaTimes, FaUser } from 'react-icons/fa'
+import { useSelector } from 'react-redux'
 
 const Header = () => {
     const [isOpenMobileNav, setIsOpenMobileNav] = useState();
+
+    const {items, totalItems, totalPrice} = useSelector((state)=>state.cartSlice); 
 
     const toggleMobileNav = () => {
         setIsOpenMobileNav(!isOpenMobileNav);
@@ -26,7 +29,7 @@ const Header = () => {
                         <li><Link href={"/about"}>About</Link></li>
                         <li><Link href={"/contact"}>Contact</Link></li>
                         <li><Link href={"/categories"}
-                            className='px-5 py-3 bg-black rounded-xl text-lg border-2 border-black  hover:bg-brand transition-all duration-500'
+                            className='px-5 py-3 bg-black rounded-xl text-lg border-2 border-black  hover:bg-brand focus:bg-brand transition-all duration-500'
                         >Order Online</Link></li>
                     </ul>
 
@@ -38,9 +41,9 @@ const Header = () => {
                         <button className='flex items-center gap-2 relative cursor-pointer'>
                             <span
                                 className='absolute left-2 -top-4 size-5 text-xs rounded-full flex items-center justify-center bg-white text-brand font-bold '
-                            >10</span>
+                            >{totalItems}</span>
                             <FaCartPlus size={20} />
-                            <span>Rs 0.00</span>
+                            <span>Rs {totalPrice}</span>
                         </button>
 
                         <button onClick={toggleMobileNav} className='block lg:hidden cursor-pointer text-xl'>

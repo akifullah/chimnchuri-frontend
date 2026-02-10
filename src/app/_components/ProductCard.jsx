@@ -1,8 +1,14 @@
+"use client";
 import React from 'react'
 import Img from './Img'
 import { FaCartPlus } from 'react-icons/fa';
+import { useDispatch } from 'react-redux';
+import { openItemModal } from '@/store/features/itemModalSlice';
 
 const ProductCard = ({ item }) => {
+
+    const dispatch = useDispatch();
+
     const img = item?.media[0]?.original_url ?? null;
     return (
         <div className='rounded-2xl h-full border-4 border-transparent hover:border-brand group transition duration-300 bg-white'>
@@ -18,7 +24,9 @@ const ProductCard = ({ item }) => {
                 <div className="flex items-center justify-between mt-2">
                     <p className='font-bold text-brand'>£ {item?.sizes[0]?.price}</p>
 
-                    <button className='size-7 md:size-8 rounded-full bg-brand text-white flex items-center justify-center cursor-pointer'>
+                    <button
+                    onClick={()=>dispatch(openItemModal(item))}
+                     className='size-7 md:size-8 rounded-full bg-brand text-white flex items-center justify-center cursor-pointer'>
                         <FaCartPlus className='size-3 md:size-4' />
                     </button>
                 </div>

@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { makeStore } from "./store";
 import { Provider } from "react-redux";
+import { initializeCart } from "./features/cartSlice";
 
 export default function ReduxProvider({ children }) {
     const storeRef = useRef();
@@ -10,6 +11,16 @@ export default function ReduxProvider({ children }) {
     if (!storeRef.current) {
         storeRef.current = makeStore();
     }
+
+    useEffect(() => {
+        let cartItems = localStorage.getItem("cartItems") ? JSON.parse(localStorage.getItem("cartItems")) : {};
+        console.log(cartItems)
+        if(storeRef.current){
+            storeRef.current.dispatch(initializeCart(cartItems))
+        }
+         
+    }, []);
+
 
     return (
         <Provider store={storeRef.current}>
