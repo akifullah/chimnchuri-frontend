@@ -26,3 +26,7 @@ body {
   color: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.StripeElement input {
+  border-radius: 1000px;
+}
