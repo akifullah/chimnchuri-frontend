@@ -49,7 +49,7 @@ const Header = () => {
                                 className='absolute left-2 -top-4 size-5 text-xs rounded-full flex items-center justify-center bg-white text-brand font-bold '
                             >{totalItems}</span>
                             <FaCartPlus size={20} />
-                            <span>Rs {totalPrice.toFixed(2)}</span>
+                            {/* <span>Rs {totalPrice.toFixed(2)}</span> */}
                         </button>
 
                         <button onClick={toggleMobileNav} className='block lg:hidden cursor-pointer text-xl'>
