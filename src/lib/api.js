@@ -55,3 +55,16 @@ export async function fetchCategory(slug) {
 
     return res.json();
 }
+
+// CHECKCOUT 
+export const createOrder = (data) => apiClient("/process-checkout", {
+    method: "POST",
+    body: JSON.stringify(data)
+});
+
+
+// ORDERS
+
+export const fetchOrder = (id) => apiClient(`/orders/${id}`);
+
+

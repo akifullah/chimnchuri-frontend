@@ -1,7 +1,7 @@
 "use client";
 import React from 'react'
 import Img from './Img'
-import { FaCartPlus } from 'react-icons/fa';
+import { FaPlus, FaShoppingBag } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
 import { openItemModal } from '@/store/features/itemModalSlice';
 
@@ -10,28 +10,66 @@ const ProductCard = ({ item }) => {
     const dispatch = useDispatch();
 
     const img = item?.media[0]?.original_url ?? null;
-    return (
-        <div className='rounded-2xl h-full border-4 border-transparent hover:border-brand group transition duration-300 bg-white'>
-            <div className="img aspect-square rounded-xl overflow-hidden">
-                <Img src={img} className='aspect-square object-cover group-hover:scale-105 transition duration-300' />
-            </div>
-            <div className="text-zinc-900 px-1 lg:px-2 pt-2 md:pt-4 pb-1">
-                <div className="">
-                    <h3 className='text-sm sm:text-md lg:text-lg font-bold capitalize text-brand line-clamp-1'>{(item?.name?.toLowerCase())}</h3>
-                    <p className='line-clamp-2 text-xs lg:text-sm h-[2lh]'>{item?.description}</p>
-                </div>
+    const price = item?.sizes[0]?.price;
 
-                <div className="flex items-center justify-between mt-2">
-                    <p className='font-bold text-brand'>£ {item?.sizes[0]?.price}</p>
+    return (
+        <div
+            className='group relative rounded-2xl overflow-hidden h-full bg-[#1e1e1e] border border-white/[0.06] hover:border-brand/30 transition-all duration-400 cursor-pointer shadow-lg shadow-black/10 hover:shadow-xl hover:shadow-brand/5'
+            onClick={() => dispatch(openItemModal(item))}
+        >
+            {/* Image */}
+            <div className="aspect-square overflow-hidden relative bg-zinc-800">
+                {img ? (
+                    <Img
+                        src={img}
+                        className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out'
+                        alt={item?.name}
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-zinc-500">
+                        <FaShoppingBag size={36} />
+                    </div>
+                )}
+
+                {/* Gradient overlay */}
+                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#1e1e1e] to-transparent" />
+
+                {/* Price badge */}
+                {price && (
+                    <div className="absolute top-2.5 right-2.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10">
+                        <span className="text-sm font-bold text-white">Rs {price}</span>
+                    </div>
+                )}
+            </div>
+
+            {/* Content */}
+            <div className="px-3 pb-3 pt-1 flex flex-col gap-1.5">
+                <h3 className='text-sm sm:text-[15px] font-bold capitalize text-white line-clamp-1 group-hover:text-brand transition-colors duration-300'>
+                    {item?.name?.toLowerCase()}
+                </h3>
+
+                <p className='line-clamp-2 text-[12px] leading-relaxed text-zinc-300 min-h-[2lh]'>
+                    {item?.description}
+                </p>
+
+                {/* Bottom row */}
+                <div className="flex items-center justify-between mt-1">
+                    {price && (
+                        <span className="text-xs text-zinc-400 font-medium">
+                            From Rs {price}
+                        </span>
+                    )}
 
                     <button
-                    onClick={()=>dispatch(openItemModal(item))}
-                     className='size-7 md:size-8 rounded-full bg-brand text-white flex items-center justify-center cursor-pointer'>
-                        <FaCartPlus className='size-3 md:size-4' />
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            dispatch(openItemModal(item));
+                        }}
+                        className='ml-auto size-8 rounded-xl bg-brand/15 hover:bg-brand text-brand hover:text-white flex items-center justify-center cursor-pointer transition-all duration-300 group-hover:bg-brand group-hover:text-white'
+                    >
+                        <FaPlus size={12} />
                     </button>
                 </div>
-
-
             </div>
         </div>
     )

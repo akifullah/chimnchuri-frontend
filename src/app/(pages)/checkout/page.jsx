@@ -4,21 +4,22 @@ import React, { useRef, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import CheckoutForm from "./CheckoutForm";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Img from "@/app/_components/Img";
 import { useForm } from "react-hook-form";
+import { FaMapMarkerAlt, FaCreditCard, FaMoneyBillWave, FaShoppingBag, FaShieldAlt, FaArrowRight } from "react-icons/fa";
+import { createOrder } from "@/lib/api";
+import { clearCart } from "@/store/features/cartSlice";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 export default function CheckoutPage() {
+
+    const dispatch = useDispatch();
+
     const { items, totalPrice } = useSelector((state) => state.cartSlice);
-
     const { register, handleSubmit, formState: { errors } } = useForm();
-
-
-
     const [paymentMethod, setPaymentMethod] = useState("cod");
-
     const checkoutFormRef = useRef(null);
 
     const deliveryFee = 150;
@@ -27,148 +28,151 @@ export default function CheckoutPage() {
     const handlePlaceOrder = async (data) => {
         const formData = { ...data, payment_method: paymentMethod };
         if (paymentMethod === "cod") {
-            console.log("Placing COD Order...");
-            const response = await fetch("http://127.0.0.1:8000/api/process-checkout", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    ...formData,
-                    items: items,
-                    amount: totalPrice,
-                }),
+            const response = await createOrder({
+                ...formData,
+                items: items,
+                amount: totalPrice,
             });
-
-            const data = await response.json();
-
-            if (data.success) {
-                window.location.href = "/thank-you";
+            if (response.success) {
+                dispatch(clearCart());
+                window.location.href = `/thank-you?id=${response.orderId}`;
             }
-
-            // Here call your normal order API for COD
-            return;
         }
 
         if (paymentMethod === "online") {
-            const success = await checkoutFormRef.current?.submitPayment(formData);
-
-            if (success) {
-                window.location.href = "/thank-you";
+            const response = await checkoutFormRef.current?.submitPayment(formData);
+            console.log(response);
+            if (response.success) {
+                dispatch(clearCart());
+                window.location.href = `/thank-you?id=${response.orderId}`;
             }
         }
-
-
-
     };
 
+    const InputField = ({ label, name, type = "text", placeholder, options = {} }) => (
+        <div className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">{label}</label>
+            <input
+                type={type}
+                {...register(name, options)}
+                placeholder={placeholder}
+                className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/10 rounded-xl text-white placeholder-zinc-400 text-sm
+                    focus:outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 focus:bg-white/[0.08]
+                    transition-all duration-300 hover:border-white/20"
+            />
+            {errors[name] && <p className="text-xs text-red-400 mt-1">{errors[name].message}</p>}
+        </div>
+    );
+
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
-            <div className="container mx-auto">
-                <h1 className="text-3xl font-heading font-bold text-foreground mb-8">Checkout</h1>
+        <div className="min-h-screen bg-[#141414] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden text-white">
+            {/* Background elements */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-brand/10 blur-3xl opacity-50" />
+                <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-brand/5 blur-3xl opacity-30" />
+            </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="max-w-7xl mx-auto relative z-10">
+                <header className="mb-10">
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">Checkout</h1>
+                    <p className="text-zinc-300 text-sm">Complete your order with secure delivery and payment</p>
+                </header>
 
-                    <div className="lg:col-span-2 space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    {/* Left Column: Forms */}
+                    <div className="lg:col-span-8 space-y-8">
 
                         {/* 1. Delivery Address */}
-                        <section className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                            <div className="flex items-center gap-3 mb-6">
-                                {/* <span className="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center text-sm font-bold">1</span> */}
-                                <h2 className="text-xl font-heading font-semibold text-foreground">Delivery Address</h2>
+                        <section className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-10 h-10 rounded-xl bg-brand/20 flex items-center justify-center">
+                                    <FaMapMarkerAlt className="text-brand" size={18} />
+                                </div>
+                                <h2 className="text-xl font-bold">Delivery Address</h2>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
-                                    <label className="text-sm font-medium text-foreground">Full name</label>
-                                    <input type="text" {...register("full_name")} placeholder="John Doe" className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all placeholder:text-muted-foreground/50" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <InputField label="Full name" name="full_name" placeholder="John Doe" options={{ required: "Name is required" }} />
+                                <InputField label="Phone Number" name="phone" placeholder="+92 300 1234567" options={{ required: "Phone is required" }} />
+                                <div className="md:col-span-2">
+                                    <InputField label="Street Address" name="street_address" placeholder="123 Food Street, Block A" options={{ required: "Address is required" }} />
                                 </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-sm font-medium text-foreground">Phone</label>
-                                    <input type="text" {...register("phone")} placeholder="+94 77 123 4567" className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all placeholder:text-muted-foreground/50" />
-                                </div>
+                                <InputField label="City" name="city" placeholder="Lahore" options={{ required: "City is required" }} />
+                                <InputField label="Postal Code" name="postal_code" placeholder="54000" />
                                 <div className="md:col-span-2 space-y-1.5">
-                                    <label className="text-sm font-medium text-foreground">Street address</label>
-                                    <input type="text" {...register("street_address")} placeholder="123 Main Street" className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all placeholder:text-muted-foreground/50" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-sm font-medium text-foreground">City</label>
-                                    <input type="text" {...register("city")} placeholder="Colombo" className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all placeholder:text-muted-foreground/50" />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-sm font-medium text-foreground">Postal Code</label>
-                                    <input type="text" {...register("postal_code")} placeholder="00100" className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all placeholder:text-muted-foreground/50" />
-                                </div>
-                                <div className="md:col-span-2 space-y-1.5">
-                                    <label className="text-sm font-medium text-foreground">Delivery Instructions (Optional)</label>
+                                    <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Delivery Instructions (Optional)</label>
                                     <textarea
                                         {...register("delivery_instructions")}
                                         placeholder="Ring the doorbell, leave at gate, etc..."
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all placeholder:text-muted-foreground/50 min-h-[100px] resize-y"
+                                        className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/10 rounded-xl text-white placeholder-zinc-400 text-sm
+                                            focus:outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 focus:bg-white/[0.08]
+                                            transition-all duration-300 hover:border-white/20 min-h-[100px] resize-none"
                                     />
                                 </div>
                             </div>
                         </section>
 
-                        <div className="bg-white p-6 rounded-xl shadow">
-
-                            <div className="flex items-center gap-3 mb-6">
-                                {/* <span className="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center text-sm font-bold">2</span> */}
-                                <h2 className="text-xl font-heading font-semibold text-foreground">Payment Method</h2>
+                        {/* 2. Payment Method */}
+                        <section className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-10 h-10 rounded-xl bg-brand/20 flex items-center justify-center">
+                                    <FaCreditCard className="text-brand" size={18} />
+                                </div>
+                                <h2 className="text-xl font-bold">Payment Method</h2>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                                 <button
                                     onClick={() => setPaymentMethod('cod')}
-                                    className={`relative p-2 rounded-xl cursor-pointer border-2 text-left transition-all duration-200 ${paymentMethod === 'cod' ? 'border-brand bg-brand/5' : 'border-gray-200 hover:border-brand/30'}`}
+                                    type="button"
+                                    className={`relative group flex flex-col items-start p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer text-left
+                                        ${paymentMethod === 'cod'
+                                            ? 'border-brand bg-brand/10'
+                                            : 'border-white/10 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]'}`}
                                 >
-                                    <div className="flex items-center gap-3 mb-0">
-                                        <div className={`size-8 rounded-full flex items-center justify-center ${paymentMethod === 'cod' ? 'bg-brand text-white' : 'bg-gray-100 text-gray-500'}`}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="12" x="2" y="6" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></svg>
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${paymentMethod === 'cod' ? 'bg-brand text-white shadow-lg shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
+                                            <FaMoneyBillWave size={18} />
                                         </div>
-                                        <span className={`font-semibold text-sm ${paymentMethod === 'cod' ? 'text-brand' : 'text-gray-700'}`}>Cash on Delivery</span>
+                                        <div className="font-bold text-sm">Cash on Delivery</div>
                                     </div>
-                                    <p className="text-xs -mt-2 text-gray-500 pl-[42px]">Pay when your order arrives at your doorstep.</p>
-                                    {paymentMethod === 'cod' && <div className="absolute top-4 right-4 text-brand"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg></div>}
+                                    <p className="text-xs text-zinc-400 leading-relaxed">Pay with cash when your delicious food arrives at your doorstep.</p>
+                                    {paymentMethod === 'cod' && (
+                                        <div className="absolute top-4 right-4 text-brand">
+                                            <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                            </div>
+                                        </div>
+                                    )}
                                 </button>
 
                                 <button
-
                                     onClick={() => setPaymentMethod('online')}
-                                    className={`relative p-2 rounded-xl cursor-pointer border-2 text-left transition-all duration-200 ${paymentMethod === 'online' ? 'border-brand bg-brand/5' : 'border-gray-200 hover:border-brand/30'}`}
+                                    type="button"
+                                    className={`relative group flex flex-col items-start p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer text-left
+                                        ${paymentMethod === 'online'
+                                            ? 'border-brand bg-brand/10'
+                                            : 'border-white/10 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]'}`}
                                 >
-                                    <div className="flex items-center gap-3 mb-0">
-                                        <div className={`size-8 rounded-full flex items-center justify-center ${paymentMethod === 'online' ? 'bg-brand text-white' : 'bg-gray-100 text-gray-500'}`}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></svg>
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${paymentMethod === 'online' ? 'bg-brand text-white shadow-lg shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
+                                            <FaCreditCard size={18} />
                                         </div>
-                                        <span className={`font-semibold text-sm ${paymentMethod === 'online' ? 'text-brand' : 'text-gray-700'}`}>Pay Online</span>
+                                        <div className="font-bold text-sm">Pay Online</div>
                                     </div>
-                                    <p className="text-xs -mt-2 text-gray-500 pl-[42px]">Secure payment via Credit/Debit Card.</p>
-                                    {paymentMethod === 'online' && <div className="absolute top-4 right-4 text-brand"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg></div>}
+                                    <p className="text-xs text-zinc-400 leading-relaxed">Fast and secure payment using your credit or debit card.</p>
+                                    {paymentMethod === 'online' && (
+                                        <div className="absolute top-4 right-4 text-brand">
+                                            <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                            </div>
+                                        </div>
+                                    )}
                                 </button>
-
-                                {/* <button
-                                onClick={() => setPaymentMethod("cod")}
-                                className={`p-3 border rounded ${paymentMethod === "cod"
-                                    ? "border-green-600 bg-green-50"
-                                    : "border-gray-300"
-                                    }`}
-                            >
-                                Cash on Delivery
-                            </button>
-
-                            <button
-                                onClick={() => setPaymentMethod("online")}
-                                className={`p-3 border rounded ${paymentMethod === "online"
-                                    ? "border-green-600 bg-green-50"
-                                    : "border-gray-300"
-                                    }`}
-                            >
-                                Pay Online
-                            </button> */}
                             </div>
 
                             {paymentMethod === "online" && (
-                                <div className="mb-6">
+                                <div className="mb-10 pt-4 border-t border-white/5">
                                     <Elements stripe={stripePromise}>
                                         <CheckoutForm
                                             ref={checkoutFormRef}
@@ -180,81 +184,81 @@ export default function CheckoutPage() {
 
                             <button
                                 onClick={handleSubmit(handlePlaceOrder)}
-                                className="w-full cursor-pointer py-4 bg-green-700 text-white font-bold rounded-xl"
+                                className="group w-full flex items-center justify-center gap-3 py-4.5 bg-brand hover:bg-green-700 active:bg-green-800 text-white font-bold rounded-2xl transition-all duration-300 shadow-xl shadow-brand/20 hover:shadow-brand/40 cursor-pointer"
                             >
                                 Place Order
+                                <FaArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                             </button>
-
-                        </div>
+                        </section>
                     </div>
 
                     {/* Right Column: Order Summary */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm sticky top-8">
-                            <h2 className="text-xl font-heading font-semibold text-foreground mb-6">Order Summary</h2>
+                    <aside className="lg:col-span-4 lg:sticky lg:top-8">
+                        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
+                            <h2 className="text-xl font-bold mb-8 flex items-center gap-3">
+                                <FaShoppingBag className="text-brand/60" size={18} />
+                                Order Summary
+                            </h2>
 
-                            <div className="space-y-6 mb-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                                {items.map((item) => (
-                                    <div key={item.id} className="flex gap-4">
-                                        <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden relative shrink-0">
+                            <div className="space-y-6 mb-8 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
+                                {items.map((item, idx) => (
+                                    <div key={idx} className="flex gap-4 group">
+                                        <div className="w-16 h-16 rounded-xl bg-zinc-800 border border-white/5 overflow-hidden relative shrink-0">
                                             {item.image ? (
-                                                <Img src={item.image} alt={item.name} fill className="object-cover" />
+                                                <Img src={item.image} alt={item.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                    <FaShoppingBag size={20} />
+                                                <div className="w-full h-full flex items-center justify-center text-zinc-500">
+                                                    <FaShoppingBag size={24} />
                                                 </div>
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex justify-between items-start">
+                                            <div className="flex justify-between items-start gap-2">
                                                 <div>
-                                                    <h3 className="font-medium text-foreground text-sm line-clamp-2">{item.name}</h3>
-                                                    <p className="text-xs text-muted-foreground">{item.selectedSize.name}</p>
+                                                    <h3 className="font-bold text-white text-sm line-clamp-1 mb-0.5">{item.name}</h3>
+                                                    <p className="text-[11px] text-zinc-400 font-medium">{item.selectedSize.name}</p>
                                                 </div>
-                                                <p className="text-sm font-semibold text-foreground">Rs {item.itemTotal.toFixed(2)}</p>
+                                                <p className="text-sm font-bold text-zinc-200">Rs {item.itemTotal.toFixed(2)}</p>
                                             </div>
 
-                                            {/* Addons Display */}
                                             {item.selectedAddons && item.selectedAddons.length > 0 && (
-                                                <div className="mt-2 text-xs text-gray-500 space-y-0.5">
-                                                    {item.selectedAddons.map((addon, idx) => (
-                                                        <div key={`${addon.id}-${idx}`} className="flex justify-between">
+                                                <div className="mt-2 text-[10px] space-y-0.5">
+                                                    {item.selectedAddons.map((addon, aIdx) => (
+                                                        <div key={aIdx} className="flex justify-between text-zinc-400 italic">
                                                             <span>+ {addon.name}</span>
-                                                            <span>Rs {addon.price}</span>
+                                                            <span className="text-zinc-500 ml-2">Rs {parseFloat(addon.price) || 0}</span>
                                                         </div>
                                                     ))}
                                                 </div>
                                             )}
 
-                                            <div className="mt-2 text-xs text-brand font-medium">Qty: {item.quantity}</div>
+                                            <div className="mt-2 text-[11px] font-bold text-brand/80">Qty: {item.quantity}</div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="border-t border-gray-100 pt-4 space-y-3">
-                                <div className="flex justify-between text-sm text-gray-600">
+                            <div className="border-t border-white/5 pt-6 space-y-4">
+                                <div className="flex justify-between text-sm text-zinc-300">
                                     <span>Subtotal</span>
-                                    <span>Rs {totalPrice.toFixed(2)}</span>
+                                    <span className="text-zinc-200">Rs {totalPrice.toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between text-sm text-gray-600">
+                                <div className="flex justify-between text-sm text-zinc-300">
                                     <span>Delivery Fee</span>
-                                    <span>Rs {deliveryFee.toFixed(2)}</span>
+                                    <span className="text-zinc-200">Rs {deliveryFee.toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between text-lg font-bold text-foreground pt-2 border-t border-gray-100 mt-2">
-                                    <span>Total</span>
-                                    <span>Rs {grandTotal.toFixed(2)}</span>
+                                <div className="flex justify-between items-center pt-4 border-t border-white/10">
+                                    <span className="text-base font-bold text-white">Total</span>
+                                    <span className="text-2xl font-black text-brand tracking-tight">Rs {grandTotal.toFixed(2)}</span>
                                 </div>
                             </div>
 
-                            <div className="mt-6 flex items-center gap-2 text-xs text-gray-400 justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                                <span>Secure Checkout</span>
+                            <div className="mt-8 flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.02] border border-white/5 text-[10px] text-zinc-400 justify-center uppercase tracking-widest font-bold">
+                                <FaShieldAlt className="text-brand/50" />
+                                <span>Encrypted & Secure</span>
                             </div>
                         </div>
-                    </div>
-
-
+                    </aside>
                 </div>
             </div>
         </div>

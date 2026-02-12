@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { FaBars, FaCarAlt, FaCartPlus, FaTimes, FaUser } from 'react-icons/fa'
@@ -8,6 +8,9 @@ import SidebarCart from './SidebarCart'
 import { toggleCart } from '@/store/features/cartSlice'
 
 const Header = () => {
+    const [mounted, setMounted] = useState(false)
+    const auth = useSelector((state) => state.authSlice);
+
     const [isOpenMobileNav, setIsOpenMobileNav] = useState(false);
     const dispatch = useDispatch();
 
@@ -16,7 +19,9 @@ const Header = () => {
     const toggleMobileNav = () => {
         setIsOpenMobileNav(!isOpenMobileNav);
     }
-
+    useEffect(() => {
+        setMounted(true)
+    }, [])
     return (
         <>
             <SidebarCart />
@@ -37,9 +42,15 @@ const Header = () => {
                     </ul>
 
                     <div className="flex items-center text-xs md:text-[14px] gap-3 md:gap-6">
-                        <Link href={"/login"} className='flex items-center gap-2'>
-                            <FaUser size={20} /> Sign in
-                        </Link>
+                        {auth?.isAuthenticated && mounted ? (
+                            <Link href={"/profile"} className='flex items-center gap-2'>
+                                <FaUser size={20} /> {auth?.user?.name}
+                            </Link>
+                        ) : (
+                            <Link href={"/login"} className='flex items-center gap-2'>
+                                <FaUser size={20} /> Sign in
+                            </Link>
+                        )}
 
                         <button
                             onClick={() => dispatch(toggleCart(true))}

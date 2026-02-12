@@ -3,64 +3,58 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { FaCheckCircle, FaCreditCard, FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaUser } from 'react-icons/fa'; // Icons
-import { MdOutlineLocalShipping, MdOutlineDescription, MdOutlineAttachMoney, MdOutlineDiscount, MdOutlineReceiptLong } from 'react-icons/md';
+import { FaCheckCircle, FaCreditCard, FaMapMarkerAlt, FaPhoneAlt, FaUser, FaShoppingBag, FaArrowLeft, FaEnvelope } from 'react-icons/fa';
+import { MdOutlineLocalShipping, MdOutlineDescription, MdOutlineAttachMoney, MdOutlineDiscount } from 'react-icons/md';
+import Img from '@/app/_components/Img';
+import { useQuery } from '@tanstack/react-query';
+import { fetchOrder } from '@/lib/api';
 
 const ThankYouPage = () => {
     const searchParams = useSearchParams();
     const orderId = searchParams.get('id');
-    const [order, setOrder] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
-    useEffect(() => {
-        if (!orderId) {
-            setLoading(false);
-            return;
-        }
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["order", orderId],
+        queryFn: () => fetchOrder(orderId),
+    })
+    let loading = isLoading;
 
-        const fetchOrder = async () => {
-            try {
-                const response = await fetch(`http://127.0.0.1:8000/api/orders/${orderId}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch order details');
-                }
-                const data = await response.json();
-                setOrder(data);
-            } catch (err) {
-                console.error("Error fetching order:", err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const order = data?.data;
 
-        fetchOrder();
-    }, [orderId]);
 
     if (loading) {
         return (
-            <div className="flex min-h-screen items-center justify-center">
-                <div className="h-12 w-12 animate-spin rounded-full border-4 border-dashed border-indigo-600"></div>
+            <div className="flex min-h-screen bg-[#141414] items-center justify-center">
+                <div className="relative">
+                    <div className="h-16 w-16 animate-spin rounded-full border-4 border-brand/20 border-t-brand"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <FaShoppingBag className="text-brand/40 animate-pulse" size={20} />
+                    </div>
+                </div>
             </div>
         );
     }
 
     if (error || !order) {
         return (
-            <main className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
-                <div className="max-w-md w-full">
-                    <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl text-red-500">
-                        Include Order ID
-                    </h1>
-                    <p className="mt-4 text-base leading-7 text-gray-600">
-                        We couldn't find your order details. Please check the URL or contact support.
-                    </p>
-                    <div className="mt-6">
-                        <Link href="/" className="btn btn-primary bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm">
-                            Go Home
-                        </Link>
+            <main className="flex min-h-screen bg-[#141414] flex-col items-center justify-center p-6 text-center text-white">
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-red-500/10 blur-3xl opacity-50" />
+                </div>
+                <div className="max-w-md w-full relative z-10 bg-white/[0.04] backdrop-blur-xl border border-white/10 p-8 rounded-3xl">
+                    <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <FaShoppingBag size={32} className="text-red-400" />
                     </div>
+                    <h1 className="text-2xl font-bold tracking-tight mb-4">
+                        Order Not Found
+                    </h1>
+                    <p className="text-zinc-400 mb-8 leading-relaxed">
+                        Wait... we couldn&apos;t find your order details. Please check the URL or contact our support team.
+                    </p>
+                    <Link href="/" className="inline-flex items-center gap-2 bg-white/[0.05] hover:bg-white/[0.1] text-white px-6 py-3 rounded-2xl font-semibold transition-all border border-white/10 group">
+                        <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
+                        Go Back Home
+                    </Link>
                 </div>
             </main>
         );
@@ -84,229 +78,261 @@ const ThankYouPage = () => {
         payment_method
     } = order;
 
-    // Helper for status badges
-    const getStatusBadge = (status, type) => {
+    const getStatusBadge = (status) => {
         const statusColors = {
-            paid: 'bg-green-100 text-green-700',
-            unpaid: 'bg-red-100 text-red-700',
-            pending: 'bg-yellow-100 text-yellow-800',
-            confirmed: 'bg-blue-100 text-blue-800',
-            processing: 'bg-blue-100 text-blue-800',
-            shipped: 'bg-purple-100 text-purple-800',
-            completed: 'bg-green-100 text-green-700',
-            cancelled: 'bg-red-100 text-red-700',
+            paid: 'bg-green-500/10 text-green-400 border-green-500/20',
+            unpaid: 'bg-red-500/10 text-red-400 border-red-500/20',
+            pending: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+            confirmed: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+            processing: 'bg-brand/10 text-brand border-brand/20',
+            shipped: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+            completed: 'bg-green-500/10 text-green-400 border-green-500/20',
+            cancelled: 'bg-red-500/10 text-red-400 border-red-500/20',
         };
-        const colorClass = statusColors[status] || 'bg-gray-100 text-gray-800';
+        const colorClass = statusColors[status] || 'bg-white/10 text-zinc-400 border-white/10';
         return (
-            <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${colorClass}`}>
+            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${colorClass}`}>
                 {status}
             </span>
         );
     };
 
-    // Format Date
     const formatDate = (dateString) => {
         const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
         return new Date(dateString).toLocaleDateString('en-US', options);
     };
 
     return (
-        <main className="min-h-screen bg-gray-50 p-3 md:p-6 font-sans text-sm">
-            <div className="max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+        <main className="min-h-screen bg-[#141414] py-8 sm:py-12 px-4 sm:px-6 relative overflow-hidden text-white font-sans">
+            {/* Background elements */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-brand/10 blur-3xl opacity-50" />
+                <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-brand/5 blur-3xl opacity-30" />
+            </div>
+
+            <div className="max-w-7xl mx-auto relative z-10">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-brand/20 flex items-center justify-center">
+                                <FaCheckCircle className="text-brand" size={20} />
+                            </div>
+                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Thank You for Your Order!</h1>
+                        </div>
+                        <p className="text-zinc-300 text-sm pl-[52px]">Your order has been received and is being processed.</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
                     {/* Left Column (Order Details) */}
-                    <div className="xl:col-span-9 lg:col-span-8 space-y-4">
+                    <div className="xl:col-span-8 space-y-6">
                         {/* Order Header Card */}
-                        <div className="bg-white rounded-2xl p-4 border border-gray-200">
-                            <div className="flex flex-wrap items-center justify-between gap-3">
-                                <div>
-                                    <h4 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                                        #{order_number}
-                                        {getStatusBadge(payment_status, 'payment')}
-                                        {getStatusBadge(order_status, 'order')}
-                                    </h4>
-                                    <p className="text-gray-500 mt-0.5 text-xs">
-                                        Order / Order Details / {order_number} - {formatDate(created_at)}
+                        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div className="space-y-1">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <h2 className="text-lg font-bold text-white tracking-tight">Order #{order_number}</h2>
+                                        <div className="flex gap-2">
+                                            {getStatusBadge(payment_status)}
+                                            {getStatusBadge(order_status)}
+                                        </div>
+                                    </div>
+                                    <p className="text-zinc-400 text-xs">
+                                        Placed on {formatDate(created_at)}
                                     </p>
                                 </div>
+                                <div className="text-sm font-bold text-brand bg-brand/10 px-4 py-2 rounded-xl border border-brand/20">
+                                    Total: Rs {grand_total}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Product Table Card */}
-                        <div className="bg-white rounded-2xl overflow-hidden border border-gray-200">
-                            <div className="px-4 py-3 border-b border-gray-100">
-                                <h4 className="text-base font-bold text-gray-800">Product</h4>
+                        {/* Product List */}
+                        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+                            <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
+                                <h3 className="font-bold flex items-center gap-2">
+                                    <FaShoppingBag className="text-brand/60" size={16} />
+                                    Order Items
+                                </h3>
+                                <span className="text-xs text-zinc-400 font-medium">{items.length} Products</span>
                             </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
-                                    <thead className="bg-gray-50/50 text-gray-500 text-xs uppercase tracking-wider">
-                                        <tr>
-                                            <th className="px-4 py-2 font-semibold">Product Name & Size</th>
-                                            <th className="px-4 py-2 font-semibold text-center">Quantity</th>
-                                            <th className="px-4 py-2 font-semibold text-right">Price</th>
-                                            <th className="px-4 py-2 font-semibold text-right">Total Amount</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-50">
-                                        {items.map((item) => (
-                                            <React.Fragment key={item.id}>
-                                                <tr className="hover:bg-gray-50/50 transition-colors">
-                                                    <td className="px-4 py-3">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="h-10 w-10 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                                                                {/* Use first media URL or fallback */}
-                                                                {item.item?.media?.[0]?.original_url ? (
-                                                                    <img
-                                                                        src={item.item.media[0].original_url}
-                                                                        alt={item.item_name}
-                                                                        className="h-full w-full object-cover"
-                                                                    />
-                                                                ) : (
-                                                                    <div className="text-gray-400 text-[10px]">No Img</div>
-                                                                )}
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-semibold text-gray-800 text-sm">{item.item_name}</p>
-                                                                <p className="text-xs text-gray-500">Size: {item.size_name}</p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3 text-center text-gray-600 text-sm">{item.quantity}</td>
-                                                    <td className="px-4 py-3 text-right text-gray-600 text-sm">£{item.price}</td>
-                                                    <td className="px-4 py-3 text-right font-semibold text-gray-800 text-sm">£{item.quantity * item.price}</td>
-                                                </tr>
-                                                {/* Addons Section */}
-                                                {item.addons && item.addons.length > 0 && (
-                                                    <tr className="bg-gray-50/30">
-                                                        <td colSpan="4" className="px-4 py-2">
-                                                            <div className="pl-12 space-y-1.5">
-                                                                {Object.entries(
-                                                                    item.addons.reduce((acc, addon) => {
-                                                                        (acc[addon.category_name] = acc[addon.category_name] || []).push(addon);
-                                                                        return acc;
-                                                                    }, {})
-                                                                ).map(([categoryName, addons]) => (
-                                                                    <div key={categoryName} className="text-xs">
-                                                                        <div className="font-semibold text-gray-700 mb-0.5">{categoryName}</div>
-                                                                        {addons.map((addon) => (
-                                                                            <div key={addon.id} className="flex mb-1 justify-between text-gray-600 pl-2">
-                                                                                <span>+ {addon.name} ({addon.quantity} x £{addon.price})</span>
-                                                                                <span>£{(addon.quantity * addon.price).toFixed(2)}</span>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </td>
-                                                    </tr>
+
+                            <div className="divide-y divide-white/[0.05]">
+                                {items.map((item, idx) => (
+                                    <div key={item.id} className="p-6 transition-all group">
+                                        <div className="flex gap-4 sm:gap-6">
+                                            {/* Thumbnail */}
+                                            <div className="h-16 w-16 sm:h-20 sm:w-20 shrink-0 bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden relative">
+                                                {item.item?.media?.[0]?.original_url ? (
+                                                    <Img
+                                                        src={item.item.media[0].original_url}
+                                                        alt={item.item_name}
+                                                        fill
+                                                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                                    />
+                                                ) : (
+                                                    <div className="h-full w-full flex items-center justify-center text-zinc-600">
+                                                        <FaShoppingBag size={24} />
+                                                    </div>
                                                 )}
-                                            </React.Fragment>
-                                        ))}
-                                        {items.length === 0 && (
-                                            <tr>
-                                                <td colSpan="4" className="px-4 py-6 text-center text-gray-400 text-sm">
-                                                    No items found in this order.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                            </div>
+
+                                            {/* Details */}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                                                    <div>
+                                                        <h4 className="font-bold text-white text-base mb-1 truncate">{item.item_name}</h4>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="text-xs text-zinc-400">Size: <span className="text-zinc-300">{item.size_name}</span></span>
+                                                            <span className="text-xs text-zinc-400">Qty: <span className="text-zinc-300">{item.quantity}</span></span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-sm font-bold text-white">Rs {(item.quantity * item.price).toFixed(2)}</p>
+                                                        <p className="text-[11px] text-zinc-400">Rs {item.price} each</p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Addons */}
+                                                {item.addons && item.addons.length > 0 && (
+                                                    <div className="mt-4 p-3 rounded-xl bg-black/20 border border-white/5 space-y-3">
+                                                        {Object.entries(
+                                                            item.addons.reduce((acc, addon) => {
+                                                                (acc[addon.category_name] = acc[addon.category_name] || []).push(addon);
+                                                                return acc;
+                                                            }, {})
+                                                        ).map(([categoryName, addons]) => (
+                                                            <div key={categoryName}>
+                                                                <p className="text-zinc-400 font-bold uppercase tracking-widest text-zinc-400 mb-1.5">{categoryName}</p>
+                                                                <div className="space-y-1.5 pl-2 border-l border-white/5">
+                                                                    {addons.map((addon) => (
+                                                                        <div key={addon.id} className="flex justify-between items-center text-xs">
+                                                                            <span className="text-zinc-300 italic text-[11px] flex items-center gap-2">
+                                                                                <span className="w-1 h-1 rounded-full bg-brand/40" />
+                                                                                {addon.name}
+                                                                            </span>
+                                                                            <span className="text-zinc-400 font-medium">
+                                                                                {addon.quantity} × Rs {addon.price}
+                                                                            </span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {items.length === 0 && (
+                                    <div className="p-12 text-center text-zinc-400 italic text-sm">
+                                        No items recorded for this order.
+                                    </div>
+                                )}
                             </div>
                         </div>
-
-
                     </div>
 
-                    {/* Right Column (Sidebar Information) */}
-                    <div className="xl:col-span-3 lg:col-span-4 space-y-4">
-                        {/* Customer Details */}
-                        <div className="bg-white rounded-2xl p-4 border border-gray-200">
-                            <h4 className="text-base font-bold text-gray-800 mb-3 border-b border-gray-100 pb-2">Customer Details</h4>
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="h-9 w-9 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 text-sm">
-                                    <FaUser />
+                    {/* Right Column (Sidebar) */}
+                    <div className="xl:col-span-4 space-y-6">
+                        {/* Summary Card */}
+                        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+                            <div className="px-6 py-5 border-b border-white/5">
+                                <h3 className="font-bold flex items-center gap-2">
+                                    <MdOutlineDescription className="text-brand/60" />
+                                    Payment Summary
+                                </h3>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-zinc-400">Subtotal</span>
+                                    <span className="font-medium text-zinc-200">Rs {sub_total}</span>
                                 </div>
-                                <div>
-                                    <p className="font-semibold text-gray-800 text-sm">{customer_name}</p>
-                                    <a className="text-xs text-brand">{customer_email}</a>
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-zinc-400">Discount</span>
+                                    <span className="font-medium text-red-400">- Rs {discount_total || 0}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-zinc-400">Delivery Charge</span>
+                                    <span className="font-medium text-zinc-200">Rs {delivery_charge || 0}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm pb-2">
+                                    <span className="text-zinc-400">Service Tax</span>
+                                    <span className="font-medium text-zinc-200">Rs {tax_total || 0}</span>
+                                </div>
+                                <div className="pt-4 border-t border-white/10 flex justify-between items-center">
+                                    <span className="font-bold text-white">Grand Total</span>
+                                    <span className="text-2xl font-black text-brand tracking-tight">Rs {grand_total}</span>
                                 </div>
                             </div>
 
-                            <div className="space-y-2.5">
-                                <div>
-                                    <div className="flex items-center gap-2 text-gray-500 font-medium text-xs mb-0.5">
-                                        <FaPhoneAlt className="text-gray-400 text-[10px]" /> Contact Number
+                            {/* Payment Method Block */}
+                            <div className="mx-6 mb-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                <div className="flex items-center gap-4">
+                                    <div className="size-10 rounded-xl bg-white/[0.05] flex items-center justify-center text-brand">
+                                        {payment_method === 'cod' ? <MdOutlineAttachMoney size={20} /> : <FaCreditCard size={18} />}
                                     </div>
-                                    <p className="text-gray-800 pl-5 text-sm">{customer_phone}</p>
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-2 text-gray-500 font-medium text-xs mb-0.5">
-                                        <FaMapMarkerAlt className="text-gray-400 text-[10px]" /> Shipping Address
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-0.5">Payment via</p>
+                                        <div className="flex items-center justify-between">
+                                            <p className="font-bold text-sm text-zinc-200 capitalize">
+                                                {payment_method === 'cod' ? 'Cash On Delivery' : payment_method}
+                                            </p>
+                                            {payment_status === 'paid' && <FaCheckCircle className="text-green-500" size={14} />}
+                                        </div>
                                     </div>
-                                    <p className="text-gray-800 pl-5 text-sm leading-relaxed">{delivery_address}</p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Order Summary */}
-                        <div className="bg-white rounded-2xl overflow-hidden border border-gray-200">
-                            <div className="px-4 py-3 border-b border-gray-100">
-                                <h4 className="text-base font-bold text-gray-800">Order Summary</h4>
-                            </div>
-                            <div className="p-4 space-y-2">
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-gray-500 flex items-center gap-1.5"><MdOutlineDescription /> Sub Total :</span>
-                                    <span className="font-semibold text-gray-800">£{sub_total}</span>
-                                </div>
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-gray-500 flex items-center gap-1.5"><MdOutlineDiscount /> Discount :</span>
-                                    <span className="font-semibold text-gray-800">£{discount_total || 0}</span>
-                                </div>
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-gray-500 flex items-center gap-1.5"><MdOutlineLocalShipping /> Delivery Charge :</span>
-                                    <span className="font-semibold text-gray-800">£{delivery_charge || 0}</span>
-                                </div>
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-gray-500 flex items-center gap-1.5"><MdOutlineAttachMoney /> Estimated Tax :</span>
-                                    <span className="font-semibold text-gray-800">£{tax_total || 0}</span>
-                                </div>
-                            </div>
-                            <div className="bg-gray-50 px-4 py-3 flex justify-between items-center border-t border-gray-100">
-                                <span className="font-bold text-gray-800 text-sm">Total Amount</span>
-                                <span className="font-extrabold text-brand text-base ">£{grand_total}</span>
-                            </div>
-                        </div>
+                        {/* Customer Info */}
+                        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl">
+                            <h3 className="font-bold mb-6 flex items-center gap-2 border-b border-white/5 pb-4">
+                                <FaUser className="text-brand/60" size={16} />
+                                Delivery Details
+                            </h3>
 
-                        {/* Payment Information */}
-                        <div className="bg-white rounded-2xl p-4 border border-gray-200">
-                            <h4 className="text-base font-bold text-gray-800 mb-3 border-b border-gray-100 pb-2">Payment Information</h4>
-                            <div className="flex items-center gap-3 mb-1">
-                                <div className="h-9 w-12 bg-gray-100 rounded flex items-center justify-center text-gray-500 text-lg">
-                                    {payment_method === 'cod' ? <MdOutlineAttachMoney /> : <FaCreditCard />}
+                            <div className="space-y-6">
+                                <div className="flex gap-4">
+                                    <div className="size-10 rounded-full bg-white/[0.05] flex items-center justify-center shrink-0 border border-white/5">
+                                        <span className="text-brand text-xs font-black">{customer_name?.charAt(0)}</span>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-zinc-200 text-sm">{customer_name}</p>
+                                        <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1.5 opacity-80">
+                                            <FaEnvelope size={10} className="text-brand/40" />
+                                            {customer_email}
+                                        </p>
+                                        <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1.5 opacity-80">
+                                            <FaPhoneAlt size={10} className="text-brand/40" />
+                                            {customer_phone}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="font-semibold text-gray-800 text-sm capitalize">{payment_method === 'cod' ? 'Cash On Delivery' : payment_method}</p>
-                                    <p className="text-xs text-gray-500">{payment_status}</p>
-                                </div>
-                                <div className="ml-auto">
-                                    {payment_status === 'paid' ? (
-                                        <FaCheckCircle className="text-green-500 text-lg" />
-                                    ) : (
-                                        <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded border border-gray-200">
-                                            {payment_status}
-                                        </span>
-                                    )}
+
+                                <div className="pt-6 border-t border-white/5 relative">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-5 h-5 bg-brand/10 rounded-full flex items-center justify-center shrink-0 mt-0.5 border border-brand/20">
+                                            <FaMapMarkerAlt className="text-brand" size={10} />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-brand/60">Shipping Address</p>
+                                            <p className="text-sm text-zinc-300 leading-relaxed font-medium">{delivery_address}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-
-                        <div className="text-center mt-4">
-                            <Link href="/" className="inline-block bg-brand text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-black transition-colors shadow-sm w-full">
+                        {/* Actions */}
+                        <div className="grid grid-cols-1 gap-3 pt-2">
+                            <Link href="/" className="group flex items-center justify-center gap-2 bg-brand hover:bg-green-700 text-white py-4 rounded-2xl font-bold transition-all shadow-xl shadow-brand/20 hover:shadow-brand/40">
                                 Continue Shopping
+                                <FaShoppingBag className="group-hover:translate-x-1 transition-transform" size={14} />
                             </Link>
                         </div>
-
                     </div>
                 </div>
             </div>
