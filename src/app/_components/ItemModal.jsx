@@ -43,11 +43,20 @@ const ItemModal = () => {
             let newSelection = [...currentSelection];
 
             if (group.selection_type === 'single') {
-                newSelection = [addonId];
+                if (currentSelection.includes(addonId)) {
+                    // Allow deselecting if min_qty is not set or is 0
+                    const minQty = group.min_qty ? parseInt(group.min_qty) : 0;
+                    if (minQty === 0) {
+                        newSelection = [];
+                    }
+                } else {
+                    newSelection = [addonId];
+                }
             } else {
                 if (currentSelection.includes(addonId)) {
                     newSelection = currentSelection.filter(id => id !== addonId);
                 } else {
+                    // Only check max_qty if it's set
                     if (group.max_qty && currentSelection.length >= group.max_qty) {
                         alert(`You can only select up to ${group.max_qty} items`);
                         return prev;
@@ -86,20 +95,24 @@ const ItemModal = () => {
     const validateAddons = () => {
         for (let group of addon_groups) {
             const selectedCount = (selectedAddons[group.id] || []).length;
+            const minQty = group.min_qty ? parseInt(group.min_qty) : 0;
+            const isRequired = group.is_required;
 
-            if (group.is_required && selectedCount < (group.min_qty || 1)) {
+            // If required, selectedCount must be at least minQty (or at least 1)
+            if (isRequired && selectedCount < Math.max(minQty, 1)) {
                 const name = group.addon_category?.name || 'option';
                 if (group.selection_type === 'single') {
                     setValidationError(`Please select a ${name}`);
                 } else {
-                    setValidationError(`Please select at least ${group.min_qty || 1} item(s) from ${name}`);
+                    setValidationError(`Please select at least ${Math.max(minQty, 1)} item(s) from ${name}`);
                 }
                 setErrorGroupId(group.id);
                 return false;
             }
 
-            if (group.selection_type === 'multiple' && selectedCount > 0 && selectedCount < (group.min_qty || 1)) {
-                setValidationError(`Please select at least ${group.min_qty || 1} item(s) from ${group.addon_category?.name || 'options'}`);
+            // If not required but has a minQty, allow 0 OR >= minQty
+            if (!isRequired && minQty > 0 && selectedCount > 0 && selectedCount < minQty) {
+                setValidationError(`Please select at least ${minQty} item(s) from ${group.addon_category?.name || 'options'}`);
                 setErrorGroupId(group.id);
                 return false;
             }
@@ -229,10 +242,17 @@ const ItemModal = () => {
                                 <div className="space-y-5">
                                     {addon_groups.map((group) => {
                                         const groupCount = (selectedAddons[group.id] || []).length;
-                                        const minQty = group.min_qty || (group.is_required ? 1 : 0);
+                                        const minQty = group.min_qty ? parseInt(group.min_qty) : 0;
                                         const maxQty = group.max_qty;
+                                        const isRequired = group.is_required;
                                         const hasError = errorGroupId === group.id;
-                                        const isUnderMin = group.is_required && groupCount < minQty;
+
+                                        // Error state if:
+                                        // 1. Required and count < min
+                                        // 2. Not required, but count > 0 and count < min
+                                        const isUnderMin = isRequired
+                                            ? groupCount < Math.max(minQty, 1)
+                                            : (groupCount > 0 && groupCount < minQty);
 
                                         return (
                                             <div key={group.id} className={`rounded-2xl p-4 transition-all duration-300 ${hasError ? 'bg-red-500/5 ring-1 ring-red-500/20' : 'bg-white/[0.02]'}`}>
@@ -240,7 +260,7 @@ const ItemModal = () => {
                                                     <div>
                                                         <h4 className='text-xs font-semibold uppercase tracking-wider text-zinc-500 flex items-center gap-2'>
                                                             {group.addon_category?.name}
-                                                            {group.is_required ? (
+                                                            {isRequired ? (
                                                                 <span className='text-[10px] font-bold text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-md uppercase'>Required</span>
                                                             ) : (
                                                                 <span className="text-[10px] text-zinc-400 bg-zinc-800 px-1.5 py-0.5 rounded-md">Optional</span>
@@ -248,8 +268,10 @@ const ItemModal = () => {
                                                         </h4>
                                                         <p className='text-[11px] text-zinc-500 mt-0.5'>
                                                             {group.selection_type === 'single'
-                                                                ? 'Choose one'
-                                                                : `Choose ${minQty > 0 ? `${minQty} to ` : 'up to '}${maxQty}`
+                                                                ? (isRequired ? 'Choose one' : 'Optional (Choose one)')
+                                                                : (minQty > 0
+                                                                    ? `Choose ${minQty}${maxQty ? ` to ${maxQty}` : ' or more'}`
+                                                                    : (maxQty ? `Choose up to ${maxQty}` : 'Choose any number'))
                                                             }
                                                         </p>
                                                     </div>
@@ -260,18 +282,18 @@ const ItemModal = () => {
                                                                 ? 'bg-brand/10 text-brand border-brand/20'
                                                                 : 'bg-white/[0.05] text-zinc-400 border-white/[0.06]'
                                                             }`}>
-                                                            {groupCount}/{maxQty}
+                                                            {groupCount}{maxQty ? `/${maxQty}` : ''}
                                                         </span>
                                                     )}
                                                 </div>
                                                 {hasError && (
-                                                    <p className="text-xs text-red-400 mb-2">⚠ {group.selection_type === 'single' ? `Please select a ${group.addon_category?.name || 'option'}` : `Select at least ${minQty} item(s)`}</p>
+                                                    <p className="text-xs text-red-400 mb-2">⚠ {group.selection_type === 'single' ? `Please select a ${group.addon_category?.name || 'option'}` : `Select 0 or at least ${minQty} item(s)`}</p>
                                                 )}
 
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                     {group.items?.map((addon) => {
                                                         const isSelected = (selectedAddons[group.id] || []).includes(addon.id);
-                                                        const isDisabled = !isSelected && group.selection_type === 'multiple' && (selectedAddons[group.id] || []).length >= group.max_qty;
+                                                        const isDisabled = !isSelected && group.selection_type === 'multiple' && group.max_qty && (selectedAddons[group.id] || []).length >= group.max_qty;
 
                                                         return (
                                                             <label
@@ -372,7 +394,7 @@ const ItemModal = () => {
                             className="flex-1 h-12 rounded-xl bg-brand hover:bg-green-700 active:bg-green-800 text-white font-bold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg shadow-brand/20 hover:shadow-brand/30 cursor-pointer"
                         >
                             <span>Add to Order</span>
-                            <span className="bg-white/15 px-3 py-1 rounded-lg text-sm font-semibold">Rs {calculateTotalPrice()}</span>
+                            <span className=" px-3 py-1 rounded-lg text-sm font-semibold">Rs {calculateTotalPrice()}</span>
                         </button>
                     </div>
                 </div>
