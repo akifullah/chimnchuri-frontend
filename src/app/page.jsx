@@ -15,16 +15,7 @@ export default function Home() {
         </section>
 
         <section className="py-10 lg:py-20 ">
-          <MenuSection/>
-          {/* <div className="group text-center max-w-xl mx-auto text-white grid justify-center text-5xl md:text-9xl space-y-4 font-bold uppercase">
-            <img src="https://framerusercontent.com/images/lqVLSf1L7iXRjlle5r0lSDziZJc.png?scale-down-to=512" alt="" />
-            <div className="h-0 grid items-center overflow-hidden group-hover:h-[200] group-hover:md:h-[500] transition-all duration-500">
-              <Link href="/categories" className="hover:scale-125 hover:text-brand text-shadow-lg transition-all duration-500">Menu</Link>
-              <Link href="/categories" className="hover:scale-125 hover:text-brand text-shadow-lg transition-all duration-500">Order</Link>
-              <Link href="/" className="hover:scale-125 hover:text-brand text-shadow-lg transition-all duration-500">Team</Link>
-            </div>
-            <img src="https://framerusercontent.com/images/IBVmg3xN8SihQw2iTYArGQgLrU.png?scale-down-to=512" alt="" />
-          </div> */}
+          <MenuSection />
         </section>
         <div className="pb-4">
           <section className="py-10 lg:py-20">

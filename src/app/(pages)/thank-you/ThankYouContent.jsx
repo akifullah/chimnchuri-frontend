@@ -8,10 +8,13 @@ import { MdOutlineLocalShipping, MdOutlineDescription, MdOutlineAttachMoney, MdO
 import Img from '@/app/_components/Img';
 import { useQuery } from '@tanstack/react-query';
 import { fetchOrder } from '@/lib/api';
+import { useCurrency } from '@/app/providers/SettingsProvider';
 
 const ThankYouContent = () => {
     const searchParams = useSearchParams();
     const orderId = searchParams.get('id');
+
+    const { code, symbol, format } = useCurrency();
 
     const { data, isLoading, error } = useQuery({
         queryKey: ["order", orderId],
@@ -68,7 +71,7 @@ const ThankYouContent = () => {
         items,
         sub_total,
         discount_total,
-        delivery_charge,
+        delivery_charges,
         tax_total,
         grand_total,
         customer_name,
@@ -141,8 +144,8 @@ const ThankYouContent = () => {
                                         Placed on {formatDate(created_at)}
                                     </p>
                                 </div>
-                                <div className="text-sm font-bold text-brand bg-brand/10 px-4 py-2 rounded-xl border border-brand/20">
-                                    Total: Rs {grand_total}
+                                <div className="text-sm font-bold text-white/90 bg-brand/10 px-4 py-2 rounded-xl border border-brand/20">
+                                    Total: {symbol} {grand_total}
                                 </div>
                             </div>
                         </div>
@@ -151,7 +154,7 @@ const ThankYouContent = () => {
                         <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
                             <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
                                 <h3 className="font-bold flex items-center gap-2">
-                                    <FaShoppingBag className="text-brand/60" size={16} />
+                                    <FaShoppingBag className="text-brand" size={16} />
                                     Order Items
                                 </h3>
                                 <span className="text-xs text-zinc-400 font-medium">{items.length} Products</span>
@@ -188,8 +191,8 @@ const ThankYouContent = () => {
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
-                                                        <p className="text-sm font-bold text-white">Rs {(item.quantity * item.price).toFixed(2)}</p>
-                                                        <p className="text-[11px] text-zinc-400">Rs {item.price} each</p>
+                                                        <p className="text-sm font-bold text-white">{symbol} {(item.quantity * item.price).toFixed(2)}</p>
+                                                        <p className="text-[11px] text-zinc-400">{symbol} {item.price} each</p>
                                                     </div>
                                                 </div>
 
@@ -212,7 +215,7 @@ const ThankYouContent = () => {
                                                                                 {addon.name}
                                                                             </span>
                                                                             <span className="text-zinc-400 font-medium">
-                                                                                {addon.quantity} × Rs {addon.price}
+                                                                                {addon.quantity} × {symbol} {addon.price}
                                                                             </span>
                                                                         </div>
                                                                     ))}
@@ -241,30 +244,30 @@ const ThankYouContent = () => {
                         <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
                             <div className="px-6 py-5 border-b border-white/5">
                                 <h3 className="font-bold flex items-center gap-2">
-                                    <MdOutlineDescription className="text-brand/60" />
+                                    <MdOutlineDescription className="text-brand" />
                                     Payment Summary
                                 </h3>
                             </div>
                             <div className="p-6 space-y-4">
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-zinc-400">Subtotal</span>
-                                    <span className="font-medium text-zinc-200">Rs {sub_total}</span>
+                                    <span className="font-medium text-zinc-200">{symbol} {sub_total}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-zinc-400">Discount</span>
-                                    <span className="font-medium text-red-400">- Rs {discount_total || 0}</span>
+                                    <span className="font-medium text-red-400">- {symbol} {discount_total || 0}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-zinc-400">Delivery Charge</span>
-                                    <span className="font-medium text-zinc-200">Rs {delivery_charge || 0}</span>
+                                    <span className="font-medium text-zinc-200">{symbol} {delivery_charges || 0}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm pb-2">
                                     <span className="text-zinc-400">Service Tax</span>
-                                    <span className="font-medium text-zinc-200">Rs {tax_total || 0}</span>
+                                    <span className="font-medium text-zinc-200">{symbol} {tax_total || 0}</span>
                                 </div>
                                 <div className="pt-4 border-t border-white/10 flex justify-between items-center">
                                     <span className="font-bold text-white">Grand Total</span>
-                                    <span className="text-2xl font-black text-brand tracking-tight">Rs {grand_total}</span>
+                                    <span className="text-2xl font-black text-white/90 tracking-tight">{symbol} {grand_total}</span>
                                 </div>
                             </div>
 
@@ -290,23 +293,23 @@ const ThankYouContent = () => {
                         {/* Customer Info */}
                         <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl">
                             <h3 className="font-bold mb-6 flex items-center gap-2 border-b border-white/5 pb-4">
-                                <FaUser className="text-brand/60" size={16} />
+                                <FaUser className="text-brand" size={16} />
                                 Delivery Details
                             </h3>
 
                             <div className="space-y-6">
                                 <div className="flex gap-4">
                                     <div className="size-10 rounded-full bg-white/[0.05] flex items-center justify-center shrink-0 border border-white/5">
-                                        <span className="text-brand text-xs font-black">{customer_name?.charAt(0)}</span>
+                                        <span className="text-brand text-md font-black">{customer_name?.charAt(0)}</span>
                                     </div>
                                     <div>
                                         <p className="font-bold text-zinc-200 text-sm">{customer_name}</p>
-                                        <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1.5 opacity-80">
-                                            <FaEnvelope size={10} className="text-brand/40" />
+                                        <p className="text-xs text-zinc-100 mt-1 flex items-center gap-1.5 opacity-80">
+                                            <FaEnvelope size={10} className="text-brand" />
                                             {customer_email}
                                         </p>
-                                        <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1.5 opacity-80">
-                                            <FaPhoneAlt size={10} className="text-brand/40" />
+                                        <p className="text-xs text-zinc-100 mt-1 flex items-center gap-1.5 opacity-80">
+                                            <FaPhoneAlt size={10} className="text-brand" />
                                             {customer_phone}
                                         </p>
                                     </div>
@@ -318,7 +321,7 @@ const ThankYouContent = () => {
                                             <FaMapMarkerAlt className="text-brand" size={10} />
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-bold uppercase tracking-widest text-brand/60">Shipping Address</p>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-brand">Shipping Address</p>
                                             <p className="text-sm text-zinc-300 leading-relaxed font-medium">{delivery_address}</p>
                                         </div>
                                     </div>
@@ -328,7 +331,7 @@ const ThankYouContent = () => {
 
                         {/* Actions */}
                         <div className="grid grid-cols-1 gap-3 pt-2">
-                            <Link href="/" className="group flex items-center justify-center gap-2 bg-brand hover:bg-green-700 text-white py-4 rounded-2xl font-bold transition-all shadow-xl shadow-brand/20 hover:shadow-brand/40">
+                            <Link href="/" className="group flex items-center justify-center gap-2 bg-brand hover:bg-green-700 text-white py-4 rounded-2xl font-bold transition-all shadow-xl">
                                 Continue Shopping
                                 <FaShoppingBag className="group-hover:translate-x-1 transition-transform" size={14} />
                             </Link>

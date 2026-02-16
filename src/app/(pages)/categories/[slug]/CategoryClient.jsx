@@ -10,7 +10,6 @@ const CategoryClient = () => {
 
 
     const { data, isLoading, error } = useCategory(slug);
-    console.log(data);
 
     if (isLoading) return <div>Loading...</div>;
 

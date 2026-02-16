@@ -10,43 +10,70 @@ import { useForm } from "react-hook-form";
 import { FaMapMarkerAlt, FaCreditCard, FaMoneyBillWave, FaShoppingBag, FaShieldAlt, FaArrowRight } from "react-icons/fa";
 import { createOrder } from "@/lib/api";
 import { clearCart } from "@/store/features/cartSlice";
+import { useCurrency, useSettings } from "@/app/providers/SettingsProvider";
+import { toast } from "react-toastify";
+import useCartCalculation from "@/hooks/useCartCalculation";
+import { useRouter } from "next/navigation";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 export default function CheckoutPage() {
 
+    const { deliveryFee,
+        tax,
+        taxAmount,
+        minOrderAmount,
+        isCodEnabled,
+        isOnlineEnabled,
+        totalPrice,
+        grandTotal } = useCartCalculation();
+
+    const settings = useSettings();
+
+
+    const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
     const dispatch = useDispatch();
 
-    const { items, totalPrice } = useSelector((state) => state.cartSlice);
+    const { code, symbol, format } = useCurrency();
+
+
+    const { items } = useSelector((state) => state.cartSlice);
     const { register, handleSubmit, formState: { errors } } = useForm();
     const [paymentMethod, setPaymentMethod] = useState("cod");
     const checkoutFormRef = useRef(null);
 
-    const deliveryFee = 150;
-    const grandTotal = totalPrice + deliveryFee;
+
+    const router = useRouter()
 
     const handlePlaceOrder = async (data) => {
+        if (grandTotal < minOrderAmount) {
+            toast.error(`minimum order amount is ${symbol}${minOrderAmount}`)
+            return;
+        }
         const formData = { ...data, payment_method: paymentMethod };
         if (paymentMethod === "cod") {
             const response = await createOrder({
                 ...formData,
                 items: items,
-                amount: totalPrice,
+                amount: grandTotal,
             });
             if (response.success) {
                 dispatch(clearCart());
-                window.location.href = `/thank-you?id=${response.orderId}`;
+                toast.success("Order placed successfully");
+                router.push(`/thank-you?id=${response.orderId}`);
+                return;
             }
         }
 
         if (paymentMethod === "online") {
             const response = await checkoutFormRef.current?.submitPayment(formData);
-            console.log(response);
             if (response.success) {
                 dispatch(clearCart());
-                window.location.href = `/thank-you?id=${response.orderId}`;
+                toast.success("Order placed successfully");
+                router.push(`/thank-you?id=${response.orderId}`);
+                return;
             }
         }
+        toast.error("Something went wrong");
     };
 
     const InputField = ({ label, name, type = "text", placeholder, options = {} }) => (
@@ -184,7 +211,7 @@ export default function CheckoutPage() {
 
                             <button
                                 onClick={handleSubmit(handlePlaceOrder)}
-                                className="group w-full flex items-center justify-center gap-3 py-4.5 bg-brand hover:bg-green-700 active:bg-green-800 text-white font-bold rounded-2xl transition-all duration-300 shadow-xl shadow-brand/20 hover:shadow-brand/40 cursor-pointer"
+                                className="group w-full flex items-center justify-center gap-3 py-4.5 bg-brand hover:bg-green-700 active:bg-green-800 text-white font-bold rounded-2xl transition-all duration-300  cursor-pointer"
                             >
                                 Place Order
                                 <FaArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -216,9 +243,9 @@ export default function CheckoutPage() {
                                             <div className="flex justify-between items-start gap-2">
                                                 <div>
                                                     <h3 className="font-bold text-white text-sm line-clamp-1 mb-0.5">{item.name}</h3>
-                                                    <p className="text-[11px] text-zinc-400 font-medium">{item.selectedSize.name}</p>
+                                                    <p className="text-[12px] text-zinc-200 font-medium">{item.selectedSize.name}</p>
                                                 </div>
-                                                <p className="text-sm font-bold text-zinc-200">Rs {item.itemTotal.toFixed(2)}</p>
+                                                <p className="text-sm font-bold text-zinc-200">{symbol} {item.itemTotal.toFixed(2)}</p>
                                             </div>
 
                                             {item.selectedAddons && item.selectedAddons.length > 0 && (
@@ -226,13 +253,13 @@ export default function CheckoutPage() {
                                                     {item.selectedAddons.map((addon, aIdx) => (
                                                         <div key={aIdx} className="flex justify-between text-zinc-400 italic">
                                                             <span>+ {addon.name}</span>
-                                                            <span className="text-zinc-500 ml-2">Rs {parseFloat(addon.price) || 0}</span>
+                                                            <span className="text-zinc-500 ml-2">{symbol} {parseFloat(addon.price) || 0}</span>
                                                         </div>
                                                     ))}
                                                 </div>
                                             )}
 
-                                            <div className="mt-2 text-[11px] font-bold text-brand/80">Qty: {item.quantity}</div>
+                                            <div className="mt-2 text-[11px] font-bold text-zinc-300">Qty: {item.quantity}</div>
                                         </div>
                                     </div>
                                 ))}
@@ -241,15 +268,21 @@ export default function CheckoutPage() {
                             <div className="border-t border-white/5 pt-6 space-y-4">
                                 <div className="flex justify-between text-sm text-zinc-300">
                                     <span>Subtotal</span>
-                                    <span className="text-zinc-200">Rs {totalPrice.toFixed(2)}</span>
+                                    <span className="text-zinc-200">{symbol} {totalPrice.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-sm text-zinc-300">
                                     <span>Delivery Fee</span>
-                                    <span className="text-zinc-200">Rs {deliveryFee.toFixed(2)}</span>
+                                    <span className="text-zinc-200">{symbol} {deliveryFee.toFixed(2)}</span>
                                 </div>
+
+                                <div className="flex justify-between text-sm text-zinc-300">
+                                    <span>Tax ({tax}%)</span>
+                                    <span className="text-zinc-200">{symbol} {taxAmount.toFixed(2)}</span>
+                                </div>
+
                                 <div className="flex justify-between items-center pt-4 border-t border-white/10">
                                     <span className="text-base font-bold text-white">Total</span>
-                                    <span className="text-2xl font-black text-brand tracking-tight">Rs {grandTotal.toFixed(2)}</span>
+                                    <span className="text-2xl font-black text-white tracking-tight">{symbol} {grandTotal.toFixed(2)}</span>
                                 </div>
                             </div>
 

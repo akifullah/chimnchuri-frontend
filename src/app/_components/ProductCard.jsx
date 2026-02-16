@@ -4,10 +4,13 @@ import Img from './Img'
 import { FaPlus, FaShoppingBag } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
 import { openItemModal } from '@/store/features/itemModalSlice';
+import { useCurrency } from '../providers/SettingsProvider';
 
 const ProductCard = ({ item }) => {
 
     const dispatch = useDispatch();
+    const { code, symbol, format } = useCurrency();
+
 
     const img = item?.media[0]?.original_url ?? null;
     const price = item?.sizes[0]?.price;
@@ -37,7 +40,7 @@ const ProductCard = ({ item }) => {
                 {/* Price badge */}
                 {price && (
                     <div className="absolute top-2.5 right-2.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10">
-                        <span className="text-sm font-bold text-white">Rs {price}</span>
+                        <span className="text-sm font-bold text-white">{format(price)}</span>
                     </div>
                 )}
             </div>
@@ -55,8 +58,8 @@ const ProductCard = ({ item }) => {
                 {/* Bottom row */}
                 <div className="flex items-center justify-between mt-1">
                     {price && (
-                        <span className="text-xs text-zinc-400 font-medium">
-                            From Rs {price}
+                        <span className="text-xs text-zinc-200 font-semibold">
+                            {symbol} {price}
                         </span>
                     )}
 
@@ -65,7 +68,7 @@ const ProductCard = ({ item }) => {
                             e.stopPropagation();
                             dispatch(openItemModal(item));
                         }}
-                        className='ml-auto size-8 rounded-xl bg-brand/15 hover:bg-brand text-brand hover:text-white flex items-center justify-center cursor-pointer transition-all duration-300 group-hover:bg-brand group-hover:text-white'
+                        className='ml-auto size-8 rounded-xl bg-brand/15 hover:bg-brand text-white hover:text-white flex items-center justify-center cursor-pointer transition-all duration-300 group-hover:bg-brand group-hover:text-white'
                     >
                         <FaPlus size={12} />
                     </button>

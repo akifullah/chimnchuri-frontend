@@ -68,3 +68,10 @@ export const createOrder = (data) => apiClient("/process-checkout", {
 export const fetchOrder = (id) => apiClient(`/orders/${id}`);
 
 
+
+
+// SETTINGS
+export const settings = () => apiClient("/settings");
+
+// GET PAYMENTS SETTINGS
+export const paymentSettings = () => apiClient("/payment-settings");

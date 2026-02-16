@@ -5,9 +5,14 @@ import { FaTimes, FaPlus, FaMinus, FaCheck, FaShoppingBag } from 'react-icons/fa
 import { useDispatch, useSelector } from 'react-redux'
 import Img from './Img'
 import { addToCart } from '@/store/features/cartSlice'
+import { useCurrency } from '../providers/SettingsProvider'
 
 const ItemModal = () => {
     const dispatch = useDispatch();
+
+    const { code, symbol, format } = useCurrency();
+
+
     const { isModalOpen, itemData, isInCart } = useSelector((state) => state.itemModalSlice);
     const data = itemData;
 
@@ -221,7 +226,7 @@ const ItemModal = () => {
                                                         </div>
                                                         <span className={`font-medium text-sm ${isActive ? 'text-white' : 'text-zinc-300'}`}>{size.name}</span>
                                                     </div>
-                                                    <span className={`font-bold text-sm ${isActive ? 'text-brand' : 'text-zinc-400'}`}>Rs {size.price}</span>
+                                                    <span className={`font-bold text-sm ${isActive ? 'text-white' : 'text-zinc-100'}`}>{format(size.price)}</span>
                                                     <input
                                                         type="radio"
                                                         name="size"
@@ -334,7 +339,7 @@ const ItemModal = () => {
                                                                 </div>
 
                                                                 <span className={`text-xs whitespace-nowrap font-medium ${isSelected ? 'text-brand' : 'text-zinc-400'}`}>
-                                                                    + Rs {(() => {
+                                                                    + {symbol} {(() => {
                                                                         let price = parseFloat(addon.price);
                                                                         if (!price || price === 0) price = parseFloat(addon.addon_item?.price) || 0;
                                                                         return price;
@@ -394,7 +399,7 @@ const ItemModal = () => {
                             className="flex-1 h-12 rounded-xl bg-brand hover:bg-green-700 active:bg-green-800 text-white font-bold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg shadow-brand/20 hover:shadow-brand/30 cursor-pointer"
                         >
                             <span>Add to Order</span>
-                            <span className=" px-3 py-1 rounded-lg text-sm font-semibold">Rs {calculateTotalPrice()}</span>
+                            <span className=" px-3 py-1 rounded-lg text-sm font-semibold">{symbol} {calculateTotalPrice()}</span>
                         </button>
                     </div>
                 </div>

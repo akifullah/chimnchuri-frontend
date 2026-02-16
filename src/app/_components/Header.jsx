@@ -6,10 +6,14 @@ import { FaBars, FaCarAlt, FaCartPlus, FaTimes, FaUser } from 'react-icons/fa'
 import { useSelector, useDispatch } from 'react-redux'
 import SidebarCart from './SidebarCart'
 import { toggleCart } from '@/store/features/cartSlice'
+import { useSettings } from '../providers/SettingsProvider'
+import Img from './Img'
 
 const Header = () => {
     const [mounted, setMounted] = useState(false)
     const auth = useSelector((state) => state.authSlice);
+
+    const settings = useSettings();
 
     const [isOpenMobileNav, setIsOpenMobileNav] = useState(false);
     const dispatch = useDispatch();
@@ -29,7 +33,8 @@ const Header = () => {
                 <div className="container mx-auto flex items-center justify-between">
 
                     <a href="/">
-                        <Image src={"/logo-light.png"} alt="Chim 'N' Churri " width={100} height={60} />
+                        {/* <Image src={settings?.restaurant_logo ? `${process.env.NEXT_PUBLIC_BASE_URL}/${settings?.restaurant_logo}` : "/logo-light.png"} alt="Chim 'N' Churri " width={100} height={60} /> */}
+                        <Img src={settings?.restaurant_logo ? `${process.env.NEXT_PUBLIC_BASE_URL}/${settings?.restaurant_logo}` : "/logo-light.png"} alt="Chim 'N' Churri " width={100} height={60} />
                     </a>
 
                     <ul className='hidden lg:flex lg:relative items-center gap-8 font-medium text-xl'>

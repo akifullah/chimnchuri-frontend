@@ -16,7 +16,6 @@ export async function apiClient(url, options = {}) {
         const refreshed = await refreshAccessToken();
 
         if (refreshed) {
-            console.log("Access token refreshed, retrying original request...");
             // Retry original request after refresh
             return apiClient(url, options);
         }

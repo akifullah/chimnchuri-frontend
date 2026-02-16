@@ -5,9 +5,13 @@ import { FaTimes, FaTrash, FaMinus, FaPlus, FaShoppingBag, FaArrowRight } from '
 import { toggleCart, removeFromCart, incrementQuantity, decrementQuantity } from '@/store/features/cartSlice'
 import Link from 'next/link'
 import Img from './Img'
+import { useCurrency } from '../providers/SettingsProvider'
 
 const SidebarCart = () => {
     const dispatch = useDispatch()
+
+    const { code, symbol, format } = useCurrency();
+
     const { items, totalItems, totalPrice, isCartOpen } = useSelector((state) => state.cartSlice)
     const sidebarRef = useRef(null)
 
@@ -137,7 +141,7 @@ const SidebarCart = () => {
                                                             <div className="flex flex-col ml-2">
                                                                 {addons.map((addon, idx) => (
                                                                     <span key={`${addon.id}-${idx}`} className="text-zinc-400">
-                                                                        + {addon.name} <span className="text-zinc-500">(Rs {parseFloat(addon.price) || parseFloat(addon.addon_item?.price) || 0})</span>
+                                                                        + {addon.name} <span className="text-zinc-500">({symbol} {parseFloat(addon.price) || parseFloat(addon.addon_item?.price) || 0})</span>
                                                                     </span>
                                                                 ))}
                                                             </div>
@@ -165,7 +169,7 @@ const SidebarCart = () => {
                                                 <FaPlus size={9} />
                                             </button>
                                         </div>
-                                        <span className="font-bold text-sm text-brand">Rs {item.itemTotal.toFixed(2)}</span>
+                                        <span className="font-bold text-sm text-zinc-200">{symbol} {item.itemTotal.toFixed(2)}</span>
                                     </div>
                                 </div>
                             ))
@@ -176,13 +180,13 @@ const SidebarCart = () => {
                     {items.length > 0 && (
                         <div className="border-t border-white/[0.06] p-5 space-y-4 bg-[#111] shrink-0">
                             <div className="space-y-2">
-                                <div className="flex justify-between text-sm text-zinc-400">
+                                <div className="flex justify-between text-sm font-semibold text-zinc-300">
                                     <span>Subtotal</span>
-                                    <span>Rs {totalPrice.toFixed(2)}</span>
+                                    <span className='text-md'>{symbol} {totalPrice.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="font-bold text-white text-lg">Total</span>
-                                    <span className="font-bold text-brand text-lg">Rs {totalPrice.toFixed(2)}</span>
+                                    <span className="font-bold text-zinc-100 text-lg">{symbol} {totalPrice.toFixed(2)}</span>
                                 </div>
                             </div>
 
