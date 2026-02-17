@@ -55,7 +55,7 @@ const ProfileClient = () => {
     const userData = data?.data || data;
 
     return (
-        <main className="min-h-screen bg-[#141414] py-12 px-4 sm:px-6 relative overflow-hidden text-white font-sans">
+        <main className="min-h-screen bg-[#141414] py-8 px-4 sm:px-6 relative overflow-hidden text-white font-sans">
             {/* Background elements */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-brand/10 blur-3xl opacity-50" />
@@ -63,7 +63,7 @@ const ProfileClient = () => {
             </div>
 
             <div className="max-w-4xl mx-auto relative z-10">
-                <div className="flex items-center justify-between mb-10">
+                <div className="flex items-center justify-between mb-6">
                     <Link href="/" className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors group">
                         <FaArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
                         <span className="text-sm font-medium">Back to Home</span>
@@ -77,12 +77,12 @@ const ProfileClient = () => {
                     </button>
                 </div>
 
-                <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/40">
+                <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl shadow-black/40">
                     {/* Profile Header */}
-                    <div className="relative h-48 bg-gradient-to-br from-brand/20 via-[#1a1a1a] to-[#141414] border-b border-white/5">
-                        <div className="absolute -bottom-16 left-8 sm:left-12">
+                    <div className="relative h-40 bg-gradient-to-br from-brand/20 via-[#1a1a1a] to-[#141414] border-b border-white/5">
+                        <div className="absolute -bottom-12 left-8 sm:left-12">
                             <div className="relative">
-                                <div className="w-32 h-32 rounded-3xl bg-[#141414] border-4 border-[#1c1c1c] shadow-2xl flex items-center justify-center p-1 overflow-hidden">
+                                <div className="w-24 h-24 rounded-2xl bg-[#141414] border-4 border-[#1c1c1c] shadow-2xl flex items-center justify-center p-1 overflow-hidden">
                                     <div className="w-full h-full rounded-2xl bg-brand/10 flex items-center justify-center">
                                         <span className="text-4xl font-black text-brand">{userData?.name?.charAt(0).toUpperCase()}</span>
                                     </div>
@@ -92,13 +92,22 @@ const ProfileClient = () => {
                         </div>
                     </div>
 
-                    <div className="pt-20 pb-12 px-8 sm:px-12">
-                        <div className="mb-10">
-                            <h1 className="text-3xl font-black tracking-tight mb-2">{userData?.name}</h1>
-                            <p className="text-brand font-bold text-sm tracking-widest uppercase">Premium Customer</p>
+                    <div className="pt-16 pb-8 px-8 sm:px-12">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+                            <div>
+                                <h1 className="text-2xl font-black tracking-tight mb-1">{userData?.name}</h1>
+                                <p className="text-brand font-bold text-sm tracking-widest uppercase">Premium Customer</p>
+                            </div>
+                            <Link
+                                href="/profile/edit"
+                                className="inline-flex items-center justify-center gap-2 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 hover:border-brand/40 text-white px-6 py-3 rounded-2xl font-bold text-sm transition-all group"
+                            >
+                                <FaUser size={14} className="text-brand group-hover:scale-110 transition-transform" />
+                                Edit Profile
+                            </Link>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Personal Info */}
                             <div className="space-y-4">
                                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 mb-2">Account Information</h3>

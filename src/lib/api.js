@@ -35,6 +35,23 @@ export async function login(data) {
 // PROFILE
 export const fetchProfile = () => apiClient("/profile");
 
+export const updateProfile = (data) => {
+    const formData = new FormData();
+    Object.keys(data).forEach(key => {
+        if (data[key] !== undefined && data[key] !== null) {
+            formData.append(key, data[key]);
+        }
+    });
+
+    return apiClient("/profile", {
+        method: "POST", // Usually POST for updates with files
+        body: formData,
+        headers: {
+            "Content-Type": undefined, // Let the browser set the boundary
+        }
+    });
+};
+
 
 // GET ALL CATEGORIES
 export async function fetchCategories() {
@@ -64,6 +81,7 @@ export const createOrder = (data) => apiClient("/process-checkout", {
 
 
 // ORDERS
+export const fetchOrders = () => apiClient("/orders");
 
 export const fetchOrder = (id) => apiClient(`/orders/${id}`);
 
