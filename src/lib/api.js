@@ -75,3 +75,6 @@ export const settings = () => apiClient("/settings");
 
 // GET PAYMENTS SETTINGS
 export const paymentSettings = () => apiClient("/payment-settings");
+
+// time slots
+export const timeSlots = () => apiClient("/time-slots");

@@ -14,9 +14,12 @@ import { useCurrency, useSettings } from "@/app/providers/SettingsProvider";
 import { toast } from "react-toastify";
 import useCartCalculation from "@/hooks/useCartCalculation";
 import { useRouter } from "next/navigation";
+import useTimeSlots from "@/hooks/useTimeSlots";
 
 
 export default function CheckoutPage() {
+
+    const { data: timeSlots, isLoading: timeSlotsLoading, error: timeSlotsError } = useTimeSlots();
 
     const { deliveryFee,
         tax,
@@ -126,6 +129,29 @@ export default function CheckoutPage() {
                                 </div>
                                 <InputField label="City" name="city" placeholder="Lahore" options={{ required: "City is required" }} />
                                 <InputField label="Postal Code" name="postal_code" placeholder="54000" />
+
+                                <div className="md:col-span-2">
+                                    <label htmlFor="time_slot_id" className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Time Slot</label>
+                                    <select
+                                        id="time_slot_id"
+                                        {...register("time_slot_id", { required: "Time slot is required" })}
+                                        required
+                                        className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/10 rounded-xl text-white placeholder-zinc-400 text-sm
+                                    focus:outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 focus:bg-white/[0.08]
+                                            transition-all duration-300 hover:border-white/20">
+                                        <option value={""} className="text-black">Select a time slot</option>
+                                        {timeSlots?.data?.map((slot) => (
+                                            <option
+                                                className={`text-black ${slot.disabled ? "text-gray-400" : ""}`}
+                                                disabled={slot.disabled}
+                                                key={slot.id} value={slot.id}>
+                                                {slot.start_time} - {slot.end_time}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.time_slot_id && <p className="text-xs text-red-400 mt-1">{errors.time_slot_id.message}</p>}
+                                </div>
+
                                 <div className="md:col-span-2 space-y-1.5">
                                     <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Delivery Instructions (Optional)</label>
                                     <textarea
@@ -293,7 +319,7 @@ export default function CheckoutPage() {
                         </div>
                     </aside>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
