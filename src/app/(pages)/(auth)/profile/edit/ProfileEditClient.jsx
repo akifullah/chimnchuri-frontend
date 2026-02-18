@@ -23,8 +23,8 @@ const ProfileEditClient = () => {
     const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
     useEffect(() => {
-        if (profileData?.data) {
-            const user = profileData.data;
+        const user = profileData?.data || profileData;
+        if (user && user.email) {
             reset({
                 name: user.name || '',
                 email: user.email || '',
@@ -34,7 +34,7 @@ const ProfileEditClient = () => {
                 postal_code: user.postal_code || '',
             });
             if (user.image) {
-                setPreviewImage(user.image);
+                setPreviewImage(`${process.env.NEXT_PUBLIC_BASE_URL}/storage/${user.image}`);
             }
         }
     }, [profileData, reset]);
@@ -116,7 +116,7 @@ const ProfileEditClient = () => {
                 </div>
 
                 <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl shadow-black/40">
-                    <form onSubmit={handleSubmit(onSubmit)} className="p-6 sm:p-8">
+                    <form onSubmit={handleSubmit(onSubmit)} className="p-6 sm:p-8" encType='multipart/formData'>
                         <div className="flex flex-col md:flex-row gap-8">
                             {/* Left Side: Avatar Upload */}
                             <div className="flex flex-col items-center space-y-4">

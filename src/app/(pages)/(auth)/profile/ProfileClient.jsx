@@ -7,6 +7,7 @@ import { logout } from '@/store/features/authSlice';
 import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaSignOutAlt, FaShoppingBag, FaArrowLeft, FaShieldAlt } from 'react-icons/fa';
 import Link from 'next/link';
+import Img from '@/app/_components/Img';
 
 const ProfileClient = () => {
     const dispatch = useDispatch();
@@ -83,9 +84,15 @@ const ProfileClient = () => {
                         <div className="absolute -bottom-12 left-8 sm:left-12">
                             <div className="relative">
                                 <div className="w-24 h-24 rounded-2xl bg-[#141414] border-4 border-[#1c1c1c] shadow-2xl flex items-center justify-center p-1 overflow-hidden">
-                                    <div className="w-full h-full rounded-2xl bg-brand/10 flex items-center justify-center">
-                                        <span className="text-4xl font-black text-brand">{userData?.name?.charAt(0).toUpperCase()}</span>
-                                    </div>
+                                    {
+                                        userData?.image ? (
+                                            <Img src={`${process.env.NEXT_PUBLIC_BASE_URL}/storage/${userData?.image}`} alt="Profile" className="w-full h-full object-cover rounded-2xl" />
+                                        ) : (
+                                            <div className="w-full h-full rounded-2xl bg-brand/10 flex items-center justify-center">
+                                                <span className="text-4xl font-black text-brand">{userData?.name?.charAt(0).toUpperCase()}</span>
+                                            </div>
+                                        )
+                                    }
                                 </div>
                                 <div className="absolute bottom-2 right-2 w-6 h-6 bg-brand rounded-full border-4 border-[#141414]" />
                             </div>

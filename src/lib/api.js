@@ -37,19 +37,23 @@ export const fetchProfile = () => apiClient("/profile");
 
 export const updateProfile = (data) => {
     const formData = new FormData();
+
     Object.keys(data).forEach(key => {
         if (data[key] !== undefined && data[key] !== null) {
             formData.append(key, data[key]);
         }
     });
 
-    return apiClient("/profile", {
-        method: "POST", // Usually POST for updates with files
+
+    return fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/profile`, {
+        method: "POST",
         body: formData,
+        credentials: "include",
+
         headers: {
-            "Content-Type": undefined, // Let the browser set the boundary
-        }
-    });
+            "Accept": "application/json",
+        },
+    }).then(res => res.json());
 };
 
 
