@@ -96,19 +96,19 @@ const OrderDetailClient = () => {
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                 <div className="space-y-4">
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <h1 className="text-2xl font-black tracking-tight">Order #{order.order_number}</h1>
+                                        <h1 className="text-xl font-black tracking-tight">Order #{order.order_number}</h1>
                                         <div className="flex gap-2">
                                             {getStatusBadge(order.order_status)}
                                             {getStatusBadge(order.payment_status)}
                                         </div>
                                     </div>
-                                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+                                    <p className="text-zinc-300 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
                                         <FaCalendarAlt className="text-zinc-600" />
                                         Placed on {formatDate(order.created_at)}
                                     </p>
                                 </div>
-                                <div className="bg-brand/10 border border-brand/20 px-6 py-3 rounded-2xl text-center">
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-brand mb-0.5">Total Amount Paid</p>
+                                <div className="bg-brand/0 border border-brand/20 px-6 py-3 rounded-2xl text-center">
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-white/60 mb-0.5">Total Amount Paid</p>
                                     <p className="text-xl font-black text-white">{symbol} {order.grand_total}</p>
                                 </div>
                             </div>
@@ -121,7 +121,7 @@ const OrderDetailClient = () => {
                                     <FaShoppingBag className="text-brand" />
                                     Order Items
                                 </h3>
-                                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">{order.items?.length || 0} Products</span>
+                                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{order.items?.length || 0} Products</span>
                             </div>
 
                             <div className="divide-y divide-white/[0.05]">
@@ -148,7 +148,7 @@ const OrderDetailClient = () => {
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                                                     <div>
-                                                        <h4 className="font-black text-white text-lg mb-2 truncate group-hover:text-brand transition-colors">{item.item_name}</h4>
+                                                        <h4 className="font-black text-white text-lg mb-2 truncate capitalize group-hover:text-brand transition-colors">{item.item_name}</h4>
                                                         <div className="flex flex-wrap items-center gap-4">
                                                             <div className="bg-white/[0.05] px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest text-zinc-400">
                                                                 Size: <span className="text-zinc-200">{item.size_name}</span>
@@ -160,7 +160,7 @@ const OrderDetailClient = () => {
                                                     </div>
                                                     <div className="text-right">
                                                         <p className="text-lg font-black text-white">{symbol} {(item.quantity * item.price).toFixed(2)}</p>
-                                                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{symbol} {item.price} each</p>
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{symbol} {item.price} each</p>
                                                     </div>
                                                 </div>
 
@@ -229,7 +229,7 @@ const OrderDetailClient = () => {
                                 </div>
                                 <div className="pt-4 border-t border-white/10 flex justify-between items-center">
                                     <span className="text-xs font-black uppercase tracking-[0.2em] text-white">Grand Total</span>
-                                    <span className="text-2xl font-black text-brand tracking-tight animate-pulse">{symbol} {order.grand_total}</span>
+                                    <span className="text-2xl font-black text-white tracking-tight animate-pulse">{symbol} {order.grand_total}</span>
                                 </div>
                             </div>
 
@@ -238,7 +238,7 @@ const OrderDetailClient = () => {
                                     {order.payment_method === 'cod' ? <MdOutlineAttachMoney size={24} /> : <FaCreditCard size={20} />}
                                 </div>
                                 <div className="flex-1">
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-0.5">Paid Using</p>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-0.5">Paid Using</p>
                                     <div className="flex items-center justify-between">
                                         <p className="font-bold text-sm text-zinc-300 capitalize">{order.payment_method === 'cod' ? 'Cash On Delivery' : order.payment_method}</p>
                                         {order.payment_status === 'paid' && <FaCheckCircle className="text-green-500" size={14} />}
@@ -262,12 +262,12 @@ const OrderDetailClient = () => {
                                     <div className="min-w-0">
                                         <p className="font-black text-white mb-1 truncate">{order.customer_name}</p>
                                         <div className="space-y-1">
-                                            <p className="text-xs font-bold text-zinc-500 flex items-center gap-2 truncate">
-                                                <FaEnvelope className="text-brand/40" size={10} />
+                                            <p className="text-xs font-bold text-zinc-300 flex items-center gap-2 truncate">
+                                                <FaEnvelope className="text-brand" size={10} />
                                                 {order.customer_email}
                                             </p>
-                                            <p className="text-xs font-bold text-zinc-500 flex items-center gap-2">
-                                                <FaPhoneAlt className="text-brand/40" size={10} />
+                                            <p className="text-xs font-bold text-zinc-300 flex items-center gap-2">
+                                                <FaPhoneAlt className="text-brand" size={10} />
                                                 {order.customer_phone}
                                             </p>
                                         </div>
@@ -280,7 +280,7 @@ const OrderDetailClient = () => {
                                             <FaMapMarkerAlt className="text-brand" size={10} />
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600">Shipping Address</p>
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Shipping Address</p>
                                             <p className="text-sm text-zinc-300 font-bold leading-relaxed">{order.delivery_address}</p>
                                         </div>
                                     </div>
@@ -288,7 +288,7 @@ const OrderDetailClient = () => {
 
                                 {order.delivery_instructions && (
                                     <div className="pt-4 mt-4 border-t border-white/5">
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-600 mb-2">Instructions</p>
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-2">Instructions</p>
                                         <p className="text-[11px] text-zinc-400 italic font-medium leading-relaxed bg-black/20 p-3 rounded-xl border border-white/5">
                                             "{order.delivery_instructions}"
                                         </p>

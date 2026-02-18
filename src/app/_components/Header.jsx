@@ -34,7 +34,7 @@ const Header = () => {
 
                     <a href="/">
                         {/* <Image src={settings?.restaurant_logo ? `${process.env.NEXT_PUBLIC_BASE_URL}/${settings?.restaurant_logo}` : "/logo-light.png"} alt="Chim 'N' Churri " width={100} height={60} /> */}
-                        <Img src={settings?.restaurant_logo ? `${process.env.NEXT_PUBLIC_BASE_URL}/${settings?.restaurant_logo}` : "/logo-light.png"} alt="Chim 'N' Churri " width={100} height={60} />
+                        <img src={settings?.restaurant_logo ? `${process.env.NEXT_PUBLIC_BASE_URL}/${settings?.restaurant_logo}` : "/logo-light.png"} onError={(e) => e.target.src = "/logo-light.png"} alt="Chim 'N' Churri " width={100} height={60} />
                     </a>
 
                     <ul className='hidden lg:flex lg:relative items-center gap-8 font-medium text-xl'>

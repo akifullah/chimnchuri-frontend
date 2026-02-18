@@ -100,3 +100,15 @@ export const paymentSettings = () => apiClient("/payment-settings");
 
 // time slots
 export const timeSlots = () => apiClient("/time-slots");
+
+
+// PASSWORD RESET
+export const forgotPasswordApi = (data) => apiClient("/forgot-password", {
+    method: "POST",
+    body: JSON.stringify(data)
+});
+
+export const resetPasswordApi = (data) => apiClient("/reset-password", {
+    method: "POST",
+    body: JSON.stringify(data)
+});

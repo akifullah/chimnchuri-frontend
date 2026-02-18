@@ -123,6 +123,7 @@ export default function CheckoutPage() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <InputField label="Full name" name="full_name" placeholder="John Doe" options={{ required: "Name is required" }} />
+                                <InputField label="Email" name="email" placeholder="Email Address" options={{ required: "Email is required" }} />
                                 <InputField label="Phone Number" name="phone" placeholder="+92 300 1234567" options={{ required: "Phone is required" }} />
                                 <div className="md:col-span-2">
                                     <InputField label="Street Address" name="street_address" placeholder="123 Food Street, Block A" options={{ required: "Address is required" }} />
