@@ -4,6 +4,7 @@ import { fetchProfile } from '../../../../lib/api';
 import { useQuery } from '@tanstack/react-query';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/store/features/authSlice';
+import { logoutApi } from "@/lib/api";
 import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaSignOutAlt, FaShoppingBag, FaArrowLeft, FaShieldAlt } from 'react-icons/fa';
 import Link from 'next/link';
@@ -18,9 +19,12 @@ const ProfileClient = () => {
         queryFn: fetchProfile,
     });
 
-    const handleLogout = () => {
-        dispatch(logout());
-        router.push('/login');
+    const handleLogout = async () => {
+        const res = await logoutApi();
+        if (res.success) {
+            dispatch(logout());
+            router.push('/login');
+        }
     };
 
     if (isLoading) {

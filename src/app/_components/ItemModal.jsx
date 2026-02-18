@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import Img from './Img'
 import { addToCart } from '@/store/features/cartSlice'
 import { useCurrency } from '../providers/SettingsProvider'
+import Price from './Price'
 
 const ItemModal = () => {
     const dispatch = useDispatch();
@@ -14,6 +15,7 @@ const ItemModal = () => {
 
 
     const { isModalOpen, itemData, isInCart } = useSelector((state) => state.itemModalSlice);
+    const { offer } = useSelector((state) => state.offerSlice);
     const data = itemData;
 
     let addon_groups = data?.addon_groups;
@@ -78,7 +80,14 @@ const ItemModal = () => {
     }
 
     const calculateTotalPrice = () => {
-        let total = parseFloat(selectedSize.price) || 0;
+        let basePrice = parseFloat(selectedSize.price) || 0;
+        let discountedBasePrice = basePrice;
+
+        if (offer && offer.type === "percentage") {
+            discountedBasePrice = basePrice - (basePrice * parseFloat(offer.value)) / 100;
+        }
+
+        let total = discountedBasePrice;
 
         Object.entries(selectedAddons).forEach(([groupId, addonIds]) => {
             const group = addon_groups?.find(g => g.id === parseInt(groupId));
@@ -209,7 +218,7 @@ const ItemModal = () => {
                                                 <label
                                                     key={size.id}
                                                     className={`
-                                                        relative flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer
+                                                        relative flex items-center justify-between px-2 py-3 capitalize rounded-xl cursor-pointer
                                                         transition-all duration-300 border
                                                         ${isActive
                                                             ? 'border-brand bg-brand/10 shadow-sm shadow-brand/10'
@@ -217,7 +226,7 @@ const ItemModal = () => {
                                                         }
                                                     `}
                                                 >
-                                                    <div className="flex items-center gap-3">
+                                                    <div className="flex items-center gap-1">
                                                         <div className={`
                                                             w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-all duration-300
                                                             ${isActive ? 'border-brand bg-brand' : 'border-zinc-600'}
@@ -226,7 +235,7 @@ const ItemModal = () => {
                                                         </div>
                                                         <span className={`font-medium text-sm ${isActive ? 'text-white' : 'text-zinc-300'}`}>{size.name}</span>
                                                     </div>
-                                                    <span className={`font-bold text-sm ${isActive ? 'text-white' : 'text-zinc-100'}`}>{format(size.price)}</span>
+                                                    <Price amount={size.price} className={`text-xs ${isActive ? 'text-white' : ''}`} />
                                                     <input
                                                         type="radio"
                                                         name="size"

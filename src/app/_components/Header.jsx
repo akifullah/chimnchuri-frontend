@@ -1,15 +1,16 @@
 "use client"
 import React, { useEffect, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { FaBars, FaCarAlt, FaCartPlus, FaTimes, FaUser } from 'react-icons/fa'
 import { useSelector, useDispatch } from 'react-redux'
 import SidebarCart from './SidebarCart'
 import { toggleCart } from '@/store/features/cartSlice'
 import { useSettings } from '../providers/SettingsProvider'
-import Img from './Img'
+import { useOffer } from '@/hooks/useOffer'
 
 const Header = () => {
+    const { data: offerData, isLoading: offerLoading, error: offerError } = useOffer();
+
     const [mounted, setMounted] = useState(false)
     const auth = useSelector((state) => state.authSlice);
 

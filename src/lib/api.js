@@ -35,6 +35,10 @@ export async function login(data) {
 // PROFILE
 export const fetchProfile = () => apiClient("/profile");
 
+export const logoutApi = () => apiClient("/logout", {
+    method: "POST",
+});
+
 export const updateProfile = (data) => {
     const formData = new FormData();
 
@@ -112,3 +116,7 @@ export const resetPasswordApi = (data) => apiClient("/reset-password", {
     method: "POST",
     body: JSON.stringify(data)
 });
+
+
+// OFFER
+export const fetchOffer = () => apiClient("/offer");

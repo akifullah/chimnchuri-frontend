@@ -20,6 +20,7 @@ import useTimeSlots from "@/hooks/useTimeSlots";
 export default function CheckoutPage() {
 
     const { data: timeSlots, isLoading: timeSlotsLoading, error: timeSlotsError } = useTimeSlots();
+    const auth = useSelector((state) => state.authSlice);
 
     const { deliveryFee,
         tax,
@@ -28,6 +29,7 @@ export default function CheckoutPage() {
         isCodEnabled,
         isOnlineEnabled,
         totalPrice,
+        discountAmount: discount,
         grandTotal } = useCartCalculation();
 
     const settings = useSettings();
@@ -52,13 +54,10 @@ export default function CheckoutPage() {
             toast.error(`minimum order amount is ${symbol}${minOrderAmount}`)
             return;
         }
-        const formData = { ...data, payment_method: paymentMethod };
+        const user_id = auth?.user?.id || null;
+        const formData = { ...data, payment_method: paymentMethod, user_id, items: items, discount: discount, tax: taxAmount, delivery_fee: deliveryFee, amount: grandTotal };
         if (paymentMethod === "cod") {
-            const response = await createOrder({
-                ...formData,
-                items: items,
-                amount: grandTotal,
-            });
+            const response = await createOrder(formData);
             if (response.success) {
                 dispatch(clearCart());
                 toast.success("Order placed successfully");
@@ -93,6 +92,11 @@ export default function CheckoutPage() {
             {errors[name] && <p className="text-xs text-red-400 mt-1">{errors[name].message}</p>}
         </div>
     );
+
+
+
+
+
 
     return (
         <div className="min-h-screen bg-[#141414] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden text-white">
@@ -300,6 +304,11 @@ export default function CheckoutPage() {
                                 <div className="flex justify-between text-sm text-zinc-300">
                                     <span>Delivery Fee</span>
                                     <span className="text-zinc-200">{symbol} {deliveryFee.toFixed(2)}</span>
+                                </div>
+
+                                <div className="flex justify-between text-sm text-green-500">
+                                    <span>Discount</span>
+                                    <span className="text-green-500">{symbol} {discount.toFixed(2)}</span>
                                 </div>
 
                                 <div className="flex justify-between text-sm text-zinc-300">

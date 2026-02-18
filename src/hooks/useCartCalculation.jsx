@@ -14,6 +14,7 @@ const useCartCalculation = () => {
     const isCodEnabled = settings?.is_cod_enabled ?? false;
     const isOnlineEnabled = settings?.is_online_enabled ?? false;
 
+    const { offer } = useSelector((state) => state.offerSlice);
     const [totalPrice, setTotalPrice] = useState(0)
 
 
@@ -34,8 +35,20 @@ const useCartCalculation = () => {
     useEffect(() => {
         calculatePrice();
     }, [items]);
+
+    let discountAmount = 0;
+    if (offer && offer.type === "percentage") {
+        discountAmount = Math.min(((totalPrice * parseFloat(offer.value)) / 100), parseFloat(offer.maximum_discount_amount));
+    }
+    else if (offer && offer.type === "fixed") {
+        discountAmount = Math.min(parseFloat(offer.value), parseFloat(offer.maximum_discount_amount));
+    }
+
+
+
+
     const taxAmount = totalPrice * tax / 100;
-    const grandTotal = totalPrice + deliveryFee + taxAmount;
+    const grandTotal = totalPrice + deliveryFee + taxAmount - discountAmount;
 
     return {
         deliveryFee,
@@ -45,6 +58,7 @@ const useCartCalculation = () => {
         isCodEnabled,
         isOnlineEnabled,
         totalPrice,
+        discountAmount,
         grandTotal,
     }
 }

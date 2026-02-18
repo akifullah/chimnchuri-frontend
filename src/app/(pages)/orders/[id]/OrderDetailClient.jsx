@@ -219,7 +219,7 @@ const OrderDetailClient = () => {
                                     <span className="text-zinc-500">Delivery Fee</span>
                                     <span className="text-zinc-200">{symbol} {order.delivery_charges || 0}</span>
                                 </div>
-                                <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest text-red-500/80">
+                                <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest text-green-500/80">
                                     <span>Discount</span>
                                     <span>- {symbol} {order.discount_total || 0}</span>
                                 </div>

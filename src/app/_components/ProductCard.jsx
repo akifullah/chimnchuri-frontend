@@ -2,14 +2,16 @@
 import React from 'react'
 import Img from './Img'
 import { FaPlus, FaShoppingBag } from 'react-icons/fa';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { openItemModal } from '@/store/features/itemModalSlice';
 import { useCurrency } from '../providers/SettingsProvider';
+import Price from './Price';
 
 const ProductCard = ({ item }) => {
 
+    const { offer } = useSelector((state) => state.offerSlice);
     const dispatch = useDispatch();
-    const { code, symbol, format } = useCurrency();
+    const { format } = useCurrency();
 
 
     const img = item?.media[0]?.original_url ?? null;
@@ -37,12 +39,16 @@ const ProductCard = ({ item }) => {
                 {/* Gradient overlay */}
                 <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#1e1e1e] to-transparent" />
 
-                {/* Price badge */}
-                {price && (
-                    <div className="absolute top-2.5 right-2.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10">
-                        <span className="text-sm font-bold text-white">{format(price)}</span>
+
+                {/* Discount badge */}
+                {offer?.type == "percentage" && (
+                    <div className="absolute top-2.5 left-2.5 bg-green-500/60 backdrop-blur-md rounded-full  flex items-center justify-center border border-white/10">
+                        <p className="text-[10px] px-3 pt-1.5 pb-1 leading-none  text-white">{`${Number(offer?.value).toFixed(0)}% OFF`}</p>
                     </div>
                 )}
+
+
+
             </div>
 
             {/* Content */}
@@ -58,9 +64,7 @@ const ProductCard = ({ item }) => {
                 {/* Bottom row */}
                 <div className="flex items-center justify-between mt-1">
                     {price && (
-                        <span className="text-xs text-zinc-200 font-semibold">
-                            {symbol} {price}
-                        </span>
+                        <Price amount={price} className="text-xs" />
                     )}
 
                     <button

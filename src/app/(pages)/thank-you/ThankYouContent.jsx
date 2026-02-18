@@ -255,7 +255,7 @@ const ThankYouContent = () => {
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-zinc-400">Discount</span>
-                                    <span className="font-medium text-red-400">- {symbol} {discount_total || 0}</span>
+                                    <span className="font-medium text-green-500">- {symbol} {discount_total || 0}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-zinc-400">Delivery Charge</span>
