@@ -147,7 +147,7 @@ const ItemModal = () => {
         const currentTotalItems = items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
         if (currentTotalItems + quantity > maxItems) {
-            setValidationError(`You can only add up to ${maxItems} items in total. For larger orders, please contact our support at +1 (234) 567-890 or support@example.com.`);
+            setValidationError(`You can only add up to ${maxItems} items in total. For larger orders, please contact our support.`);
             return;
         }
 

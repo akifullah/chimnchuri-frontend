@@ -168,7 +168,7 @@ const SidebarCart = () => {
                                                 onClick={() => {
                                                     const maxItems = process.env.NEXT_PUBLIC_MAX_CART_ITEMS ? parseInt(process.env.NEXT_PUBLIC_MAX_CART_ITEMS) : 5;
                                                     if (totalItems >= maxItems) {
-                                                        toast.info(`Cart limit of ${maxItems} items reached. For larger orders, please contact our support at +1 (234) 567-890 or support@example.com.`, {
+                                                        toast.info(`Cart limit of ${maxItems} items reached. For larger orders, please contact our support.`, {
                                                             position: "top-center",
                                                             autoClose: 5000,
                                                             theme: "dark"
