@@ -2,17 +2,14 @@
 import Link from "next/link";
 import { FaEnvelope, FaInstagram, FaTiktok, FaWhatsapp } from "react-icons/fa";
 import MenuSection from "./MenuSection";
+import HeroSection from "./_components/HeroSection";
 
 
 export default function Home() {
   return (
     <>
       <div className="flex flex-col justify-between min-h-dvh">
-        <section>
-          <div className="bg-brand py-10 lg:py-20">
-            <h1 className="text-white text-[13vw] font-bold uppercase text-center text-shadow-lg">Chimnchurri</h1>
-          </div>
-        </section>
+        <HeroSection />
 
         <section className="py-10 lg:py-20 ">
           <MenuSection />

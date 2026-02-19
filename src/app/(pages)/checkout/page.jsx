@@ -7,7 +7,7 @@ import CheckoutForm from "./CheckoutForm";
 import { useDispatch, useSelector } from "react-redux";
 import Img from "@/app/_components/Img";
 import { useForm } from "react-hook-form";
-import { FaMapMarkerAlt, FaCreditCard, FaMoneyBillWave, FaShoppingBag, FaShieldAlt, FaArrowRight } from "react-icons/fa";
+import { FaMapMarkerAlt, FaCreditCard, FaMoneyBillWave, FaShoppingBag, FaShieldAlt, FaArrowRight, FaPlus, FaMinus } from "react-icons/fa";
 import { createOrder } from "@/lib/api";
 import { clearCart } from "@/store/features/cartSlice";
 import { useCurrency, useSettings } from "@/app/providers/SettingsProvider";
@@ -46,6 +46,18 @@ export default function CheckoutPage() {
     const [paymentMethod, setPaymentMethod] = useState("cod");
     const checkoutFormRef = useRef(null);
 
+    const [allocations, setAllocations] = useState({});
+    const totalCartQty = items.reduce((sum, item) => sum + item.quantity, 0);
+    const allocatedTotal = Object.values(allocations).reduce((sum, q) => sum + q, 0);
+
+    const handleAllocationChange = (slotId, qty, max) => {
+        const value = Math.min(Math.max(0, parseInt(qty) || 0), max);
+        setAllocations(prev => ({
+            ...prev,
+            [slotId]: value
+        }));
+    };
+
 
     const router = useRouter()
 
@@ -54,8 +66,25 @@ export default function CheckoutPage() {
             toast.error(`minimum order amount is ${symbol}${minOrderAmount}`)
             return;
         }
+        if (allocatedTotal !== totalCartQty) {
+            toast.error(`Please allocate all ${totalCartQty} items to time slots. Currently allocated: ${allocatedTotal}`);
+            return;
+        }
+
         const user_id = auth?.user?.id || null;
-        const formData = { ...data, payment_method: paymentMethod, user_id, items: items, discount: discount, tax: taxAmount, delivery_fee: deliveryFee, amount: grandTotal };
+        const formData = {
+            ...data,
+            payment_method: paymentMethod,
+            user_id,
+            items: items,
+            discount: discount,
+            tax: taxAmount,
+            delivery_fee: deliveryFee,
+            amount: grandTotal,
+            allocations: Object.entries(allocations)
+                .filter(([_, qty]) => qty > 0)
+                .map(([slotId, qty]) => ({ slot_id: slotId, quantity: qty }))
+        };
         if (paymentMethod === "cod") {
             const response = await createOrder(formData);
             if (response.success) {
@@ -135,26 +164,48 @@ export default function CheckoutPage() {
                                 <InputField label="City" name="city" placeholder="Lahore" options={{ required: "City is required" }} />
                                 <InputField label="Postal Code" name="postal_code" placeholder="54000" />
 
-                                <div className="md:col-span-2">
-                                    <label htmlFor="time_slot_id" className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Time Slot</label>
-                                    <select
-                                        id="time_slot_id"
-                                        {...register("time_slot_id", { required: "Time slot is required" })}
-                                        required
-                                        className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/10 rounded-xl text-white placeholder-zinc-400 text-sm
-                                    focus:outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 focus:bg-white/[0.08]
-                                            transition-all duration-300 hover:border-white/20">
-                                        <option value={""} className="text-black">Select a time slot</option>
-                                        {timeSlots?.data?.map((slot) => (
-                                            <option
-                                                className={`text-black ${slot.disabled ? "text-gray-400" : ""}`}
-                                                disabled={slot.disabled}
-                                                key={slot.id} value={slot.id}>
-                                                {slot.start_time} - {slot.end_time}
-                                            </option>
+                                <div className="md:col-span-2 space-y-4">
+                                    <div className="flex justify-between items-end">
+                                        <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Time Slot Allocation</label>
+                                        <div className={`text-xs font-bold px-3 py-1 rounded-full ${allocatedTotal === totalCartQty ? 'bg-brand/20 text-brand' : 'bg-red-500/10 text-red-400'}`}>
+                                            {allocatedTotal} / {totalCartQty} Allocated
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {timeSlotsLoading ? (
+                                            <div className="text-zinc-500 text-sm animate-pulse">Loading time slots...</div>
+                                        ) : timeSlots?.data?.map((slot) => (
+                                            <div key={slot.id} className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${slot.disabled ? 'opacity-50 grayscale' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}>
+                                                <div className="flex-1">
+                                                    <div className="text-sm font-bold text-white">{slot.start_time} - {slot.end_time}</div>
+                                                    <div className="text-[10px] text-zinc-400 uppercase tracking-widest mt-0.5">Capacity: {slot.max_capacity}</div>
+                                                </div>
+                                                <div className="flex items-center bg-white/[0.05] border border-white/10 rounded-xl overflow-hidden shadow-inner">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleAllocationChange(slot.id, (allocations[slot.id] || 0) - 1, slot.max_capacity)}
+                                                        disabled={slot.disabled || (allocations[slot.id] || 0) <= 0}
+                                                        className="p-3 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                                                    >
+                                                        <FaMinus size={10} />
+                                                    </button>
+                                                    <div className="w-10 text-center text-sm font-bold text-white tabular-nums">
+                                                        {allocations[slot.id] || 0}
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleAllocationChange(slot.id, (allocations[slot.id] || 0) + 1, slot.max_capacity)}
+                                                        disabled={slot.disabled || (allocations[slot.id] || 0) >= slot.max_capacity || allocatedTotal >= totalCartQty}
+                                                        className="p-3 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                                                    >
+                                                        <FaPlus size={10} />
+                                                    </button>
+                                                </div>
+                                            </div>
                                         ))}
-                                    </select>
-                                    {errors.time_slot_id && <p className="text-xs text-red-400 mt-1">{errors.time_slot_id.message}</p>}
+                                    </div>
+                                    {allocatedTotal !== totalCartQty && <p className="text-[10px] text-red-400 font-medium italic">* Total items ({totalCartQty}) must be fully allocated.</p>}
                                 </div>
 
                                 <div className="md:col-span-2 space-y-1.5">
@@ -242,7 +293,11 @@ export default function CheckoutPage() {
 
                             <button
                                 onClick={handleSubmit(handlePlaceOrder)}
-                                className="group w-full flex items-center justify-center gap-3 py-4.5 bg-brand hover:bg-green-700 active:bg-green-800 text-white font-bold rounded-2xl transition-all duration-300  cursor-pointer"
+                                disabled={allocatedTotal !== totalCartQty}
+                                className={`group w-full flex items-center justify-center gap-3 py-4.5 font-bold rounded-2xl transition-all duration-300 cursor-pointer
+                                    ${allocatedTotal === totalCartQty
+                                        ? 'bg-brand hover:bg-green-700 text-white shadow-lg shadow-brand/20'
+                                        : 'bg-white/5 text-zinc-500 cursor-not-allowed border border-white/5'}`}
                             >
                                 Place Order
                                 <FaArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
