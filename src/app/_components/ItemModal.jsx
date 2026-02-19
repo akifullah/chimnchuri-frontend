@@ -15,7 +15,9 @@ const ItemModal = () => {
 
 
     const { isModalOpen, itemData, isInCart } = useSelector((state) => state.itemModalSlice);
+    const { items } = useSelector((state) => state.cartSlice);
     const { offer } = useSelector((state) => state.offerSlice);
+
     const data = itemData;
 
     let addon_groups = data?.addon_groups;
@@ -141,6 +143,15 @@ const ItemModal = () => {
             return;
         }
 
+        const maxItems = process.env.NEXT_PUBLIC_MAX_CART_ITEMS ? parseInt(process.env.NEXT_PUBLIC_MAX_CART_ITEMS) : 5;
+        const currentTotalItems = items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+
+        if (currentTotalItems + quantity > maxItems) {
+            setValidationError(`You can only add up to ${maxItems} items in total. For larger orders, please contact our support at +1 (234) 567-890 or support@example.com.`);
+            return;
+        }
+
+
         dispatch(addToCart({
             item: data,
             selectedSize,
@@ -154,6 +165,9 @@ const ItemModal = () => {
         setValidationError("");
         dispatch(closeItemModal());
     }
+
+
+
 
     return (
         <div

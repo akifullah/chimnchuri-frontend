@@ -69,10 +69,16 @@ const cartSlice = createSlice({
             };
 
             // Add to cart
+            const maxItems = process.env.NEXT_PUBLIC_MAX_CART_ITEMS ? parseInt(process.env.NEXT_PUBLIC_MAX_CART_ITEMS) : 5;
+            if (state.totalItems + quantity > maxItems) {
+                return state;
+            }
+
             state.items.push(cartItem);
             state.totalItems += quantity;
             state.totalPrice += itemTotal;
             // state.isCartOpen = true; // Open cart when adding
+
 
             localStorage.setItem("cartItems", JSON.stringify({
                 items: state.items,
@@ -103,11 +109,18 @@ const cartSlice = createSlice({
             const item = state.items.find(item => item.id === id);
 
             if (item && quantity > 0) {
+                const maxItems = process.env.NEXT_PUBLIC_MAX_CART_ITEMS ? parseInt(process.env.NEXT_PUBLIC_MAX_CART_ITEMS) : 5;
+                const newTotalItems = state.totalItems - item.quantity + quantity;
+
+                if (newTotalItems > maxItems) {
+                    return state;
+                }
+
                 const oldTotal = item.itemTotal;
                 const pricePerItem = oldTotal / item.quantity;
                 const newTotal = pricePerItem * quantity;
 
-                state.totalItems = state.totalItems - item.quantity + quantity;
+                state.totalItems = newTotalItems;
                 state.totalPrice = state.totalPrice - oldTotal + newTotal;
 
                 item.quantity = quantity;
@@ -133,6 +146,11 @@ const cartSlice = createSlice({
             const item = state.items.find(item => item.id === itemId);
 
             if (item) {
+                const maxItems = process.env.NEXT_PUBLIC_MAX_CART_ITEMS ? parseInt(process.env.NEXT_PUBLIC_MAX_CART_ITEMS) : 5;
+                if (state.totalItems >= maxItems) {
+                    return state;
+                }
+
                 const pricePerItem = item.itemTotal / item.quantity;
                 item.quantity += 1;
                 item.itemTotal += pricePerItem;
@@ -146,6 +164,7 @@ const cartSlice = createSlice({
                 }));
             }
         },
+
 
         decrementQuantity: (state, action) => {
             const itemId = action.payload;

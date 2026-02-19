@@ -6,6 +6,8 @@ import { toggleCart, removeFromCart, incrementQuantity, decrementQuantity } from
 import Link from 'next/link'
 import Img from './Img'
 import { useCurrency } from '../providers/SettingsProvider'
+import { toast } from 'react-toastify'
+
 
 const SidebarCart = () => {
     const dispatch = useDispatch()
@@ -163,11 +165,24 @@ const SidebarCart = () => {
                                             </button>
                                             <span className="w-8 text-center text-sm font-bold text-white select-none">{item.quantity}</span>
                                             <button
-                                                onClick={() => dispatch(incrementQuantity(item.id))}
-                                                className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-r-lg transition-all duration-300 cursor-pointer"
+                                                onClick={() => {
+                                                    const maxItems = process.env.NEXT_PUBLIC_MAX_CART_ITEMS ? parseInt(process.env.NEXT_PUBLIC_MAX_CART_ITEMS) : 5;
+                                                    if (totalItems >= maxItems) {
+                                                        toast.info(`Cart limit of ${maxItems} items reached. For larger orders, please contact our support at +1 (234) 567-890 or support@example.com.`, {
+                                                            position: "top-center",
+                                                            autoClose: 5000,
+                                                            theme: "dark"
+                                                        });
+                                                        return;
+                                                    }
+                                                    dispatch(incrementQuantity(item.id))
+                                                }}
+                                                className={`w-8 h-8 flex items-center justify-center rounded-r-lg transition-all duration-300 cursor-pointer ${totalItems >= (process.env.NEXT_PUBLIC_MAX_CART_ITEMS ? parseInt(process.env.NEXT_PUBLIC_MAX_CART_ITEMS) : 5) ? 'text-zinc-600 bg-white/[0.02]' : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'}`}
                                             >
                                                 <FaPlus size={9} />
                                             </button>
+
+
                                         </div>
                                         <span className="font-bold text-sm text-zinc-200">{symbol} {item.itemTotal.toFixed(2)}</span>
                                     </div>

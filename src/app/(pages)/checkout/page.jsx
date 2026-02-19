@@ -167,7 +167,7 @@ export default function CheckoutPage() {
                                 <div className="md:col-span-2 space-y-4">
                                     <div className="flex justify-between items-end">
                                         <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Time Slot Allocation</label>
-                                        <div className={`text-xs font-bold px-3 py-1 rounded-full ${allocatedTotal === totalCartQty ? 'bg-brand/20 text-brand' : 'bg-red-500/10 text-red-400'}`}>
+                                        <div className={`text-xs font-bold px-3 py-1 rounded-full ${allocatedTotal === totalCartQty ? 'bg-brand/20 text-white' : 'bg-red-500/10 text-red-400'}`}>
                                             {allocatedTotal} / {totalCartQty} Allocated
                                         </div>
                                     </div>
@@ -205,7 +205,7 @@ export default function CheckoutPage() {
                                             </div>
                                         ))}
                                     </div>
-                                    {allocatedTotal !== totalCartQty && <p className="text-[10px] text-red-400 font-medium italic">* Total items ({totalCartQty}) must be fully allocated.</p>}
+                                    {allocatedTotal !== totalCartQty && <p className="text-[12px] text-red-400 font-medium">* Total items ({totalCartQty}) must be fully allocated.</p>}
                                 </div>
 
                                 <div className="md:col-span-2 space-y-1.5">
