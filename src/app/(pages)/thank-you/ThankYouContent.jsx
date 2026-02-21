@@ -78,7 +78,8 @@ const ThankYouContent = () => {
         customer_email,
         customer_phone,
         delivery_address,
-        payment_method
+        payment_method,
+        time_slots
     } = order;
 
     const getStatusBadge = (status) => {
@@ -157,7 +158,7 @@ const ThankYouContent = () => {
                                     <FaShoppingBag className="text-brand" size={16} />
                                     Order Items
                                 </h3>
-                                <span className="text-xs text-zinc-400 font-medium">{items.length} Products</span>
+                                <span className="text-xs text-zinc-400 font-medium">{items.length} Items</span>
                             </div>
 
                             <div className="divide-y divide-white/[0.05]">
@@ -184,9 +185,9 @@ const ThankYouContent = () => {
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                                                     <div>
-                                                        <h4 className="font-bold text-white text-base mb-1 truncate">{item.item_name}</h4>
+                                                        <h4 className="font-bold text-white text-base mb-1 truncate capitalize">{item.item_name}</h4>
                                                         <div className="flex items-center gap-3">
-                                                            <span className="text-xs text-zinc-400">Size: <span className="text-zinc-300">{item.size_name}</span></span>
+                                                            <span className="text-xs text-zinc-400">Size: <span className="text-zinc-300 capitalize">{item.size_name}</span></span>
                                                             <span className="text-xs text-zinc-400">Qty: <span className="text-zinc-300">{item.quantity}</span></span>
                                                         </div>
                                                     </div>
@@ -206,11 +207,11 @@ const ThankYouContent = () => {
                                                             }, {})
                                                         ).map(([categoryName, addons]) => (
                                                             <div key={categoryName}>
-                                                                <p className="text-zinc-400 font-bold uppercase tracking-widest text-zinc-400 mb-1.5">{categoryName}</p>
+                                                                <p className="font-semibold capitalize text-md text-zinc-200 mb-1.5">{categoryName}</p>
                                                                 <div className="space-y-1.5 pl-2 border-l border-white/5">
                                                                     {addons.map((addon) => (
                                                                         <div key={addon.id} className="flex justify-between items-center text-xs">
-                                                                            <span className="text-zinc-300 italic text-[11px] flex items-center gap-2">
+                                                                            <span className="text-zinc-200 text-[12px] flex items-center gap-2">
                                                                                 <span className="w-1 h-1 rounded-full bg-brand/40" />
                                                                                 {addon.name}
                                                                             </span>
@@ -236,6 +237,41 @@ const ThankYouContent = () => {
                                 )}
                             </div>
                         </div>
+
+                        {/* time slots */}
+                        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+                            <div className="px-6 py-5 border-b border-white/5">
+                                <h3 className="font-bold flex items-center gap-2">
+                                    <MdOutlineDescription className="text-brand" size={18} />
+                                    Time Slots
+                                </h3>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                {time_slots && time_slots.length > 0 ? (
+                                    time_slots.map((slot) => (
+                                        <div key={slot.id} className="flex justify-between items-center p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                            <div className="space-y-1">
+                                                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Time Window</p>
+                                                <p className="text-sm font-medium text-zinc-200">
+                                                    {slot.start_time} — {slot.end_time}
+                                                </p>
+                                            </div>
+                                            <div className="text-right space-y-1">
+                                                <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Capacity</p>
+                                                <span className="inline-flex items-center text-[14px] font-bold text-white">
+                                                    {slot.capacity}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-4 text-zinc-500 text-sm italic">
+                                        No time slots assigned.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                     </div>
 
                     {/* Right Column (Sidebar) */}

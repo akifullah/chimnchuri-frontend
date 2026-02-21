@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import CheckoutForm from "./CheckoutForm";
@@ -18,6 +18,8 @@ import useTimeSlots from "@/hooks/useTimeSlots";
 
 
 export default function CheckoutPage() {
+
+
 
     const { data: timeSlots, isLoading: timeSlotsLoading, error: timeSlotsError } = useTimeSlots();
     const auth = useSelector((state) => state.authSlice);
@@ -45,6 +47,20 @@ export default function CheckoutPage() {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const [paymentMethod, setPaymentMethod] = useState("cod");
     const checkoutFormRef = useRef(null);
+    useEffect(() => {
+        if (settings) {
+            let isCodEnabled = settings?.is_cod_enabled;
+            let isOnlineEnabled = settings?.is_online_enabled;
+            if (isCodEnabled && isOnlineEnabled) {
+                setPaymentMethod("cod");
+            } else if (isCodEnabled) {
+                setPaymentMethod("cod");
+            } else if (isOnlineEnabled) {
+                setPaymentMethod("online");
+            }
+        }
+    }, [settings])
+
 
     const [allocations, setAllocations] = useState({});
     const totalCartQty = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -60,7 +76,7 @@ export default function CheckoutPage() {
 
 
     const router = useRouter()
-
+    const [loading, setLoading] = useState(false);
     const handlePlaceOrder = async (data) => {
         if (grandTotal < minOrderAmount) {
             toast.error(`minimum order amount is ${symbol}${minOrderAmount}`)
@@ -70,6 +86,17 @@ export default function CheckoutPage() {
             toast.error(`Please allocate all ${totalCartQty} items to time slots. Currently allocated: ${allocatedTotal}`);
             return;
         }
+
+        if (paymentMethod === "online" && !isOnlineEnabled) {
+            toast.error("Online payment is not enabled");
+            return;
+        }
+        if (paymentMethod === "cod" && !isCodEnabled) {
+            toast.error("COD is not enabled");
+            return;
+        }
+
+        setLoading(true);
 
         const user_id = auth?.user?.id || null;
         const formData = {
@@ -105,6 +132,7 @@ export default function CheckoutPage() {
             }
         }
         toast.error("Something went wrong");
+        setLoading(false);
     };
 
     const InputField = ({ label, name, type = "text", placeholder, options = {} }) => (
@@ -129,6 +157,9 @@ export default function CheckoutPage() {
 
     return (
         <div className="min-h-screen bg-[#141414] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden text-white">
+
+            {loading && <Loader />}
+
             {/* Background elements */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-brand/10 blur-3xl opacity-50" />
@@ -231,53 +262,62 @@ export default function CheckoutPage() {
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                                <button
-                                    onClick={() => setPaymentMethod('cod')}
-                                    type="button"
-                                    className={`relative group flex flex-col items-start p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer text-left
+                                {
+                                    !!isCodEnabled && (
+                                        <button
+                                            onClick={() => setPaymentMethod('cod')}
+                                            type="button"
+                                            className={`relative group flex flex-col items-start p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer text-left
                                         ${paymentMethod === 'cod'
-                                            ? 'border-brand bg-brand/10'
-                                            : 'border-white/10 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]'}`}
-                                >
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${paymentMethod === 'cod' ? 'bg-brand text-white shadow-lg shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
-                                            <FaMoneyBillWave size={18} />
-                                        </div>
-                                        <div className="font-bold text-sm">Cash on Delivery</div>
-                                    </div>
-                                    <p className="text-xs text-zinc-400 leading-relaxed">Pay with cash when your delicious food arrives at your doorstep.</p>
-                                    {paymentMethod === 'cod' && (
-                                        <div className="absolute top-4 right-4 text-brand">
-                                            <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center text-white">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                                    ? 'border-brand bg-brand/10'
+                                                    : 'border-white/10 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]'}`}
+                                        >
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${paymentMethod === 'cod' ? 'bg-brand text-white shadow-lg shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
+                                                    <FaMoneyBillWave size={18} />
+                                                </div>
+                                                <div className="font-bold text-sm">Cash on Delivery</div>
                                             </div>
-                                        </div>
-                                    )}
-                                </button>
+                                            <p className="text-xs text-zinc-400 leading-relaxed">Pay with cash when your delicious food arrives at your doorstep.</p>
+                                            {paymentMethod === 'cod' && (
+                                                <div className="absolute top-4 right-4 text-brand">
+                                                    <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center text-white">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </button>
+                                    )
+                                }
 
-                                <button
-                                    onClick={() => setPaymentMethod('online')}
-                                    type="button"
-                                    className={`relative group flex flex-col items-start p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer text-left
+                                {
+                                    !!isOnlineEnabled && (
+                                        <button
+                                            onClick={() => setPaymentMethod('online')}
+                                            type="button"
+                                            className={`relative group flex flex-col items-start p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer text-left
                                         ${paymentMethod === 'online'
-                                            ? 'border-brand bg-brand/10'
-                                            : 'border-white/10 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]'}`}
-                                >
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${paymentMethod === 'online' ? 'bg-brand text-white shadow-lg shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
-                                            <FaCreditCard size={18} />
-                                        </div>
-                                        <div className="font-bold text-sm">Pay Online</div>
-                                    </div>
-                                    <p className="text-xs text-zinc-400 leading-relaxed">Fast and secure payment using your credit or debit card.</p>
-                                    {paymentMethod === 'online' && (
-                                        <div className="absolute top-4 right-4 text-brand">
-                                            <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center text-white">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                                    ? 'border-brand bg-brand/10'
+                                                    : 'border-white/10 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]'}`}
+                                        >
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${paymentMethod === 'online' ? 'bg-brand text-white shadow-lg shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
+                                                    <FaCreditCard size={18} />
+                                                </div>
+                                                <div className="font-bold text-sm">Pay Online</div>
                                             </div>
-                                        </div>
-                                    )}
-                                </button>
+                                            <p className="text-xs text-zinc-400 leading-relaxed">Fast and secure payment using your credit or debit card.</p>
+                                            {paymentMethod === 'online' && (
+                                                <div className="absolute top-4 right-4 text-brand">
+                                                    <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center text-white">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </button>
+                                    )
+                                }
+
                             </div>
 
                             {paymentMethod === "online" && (
@@ -291,23 +331,38 @@ export default function CheckoutPage() {
                                 </div>
                             )}
 
-                            <button
-                                onClick={handleSubmit(handlePlaceOrder)}
-                                disabled={allocatedTotal !== totalCartQty}
-                                className={`group w-full flex items-center justify-center gap-3 py-4.5 font-bold rounded-2xl transition-all duration-300 cursor-pointer
+                            {
+                                !!isCodEnabled || !!isOnlineEnabled ? (
+                                    <button
+                                        onClick={handleSubmit(handlePlaceOrder)}
+                                        disabled={allocatedTotal !== totalCartQty || loading}
+                                        className={`group w-full flex items-center justify-center gap-3 py-4.5 font-bold rounded-2xl transition-all duration-300 cursor-pointer
                                     ${allocatedTotal === totalCartQty
-                                        ? 'bg-brand hover:bg-green-700 text-white shadow-lg shadow-brand/20'
-                                        : 'bg-white/5 text-zinc-500 cursor-not-allowed border border-white/5'}`}
-                            >
-                                Place Order
-                                <FaArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                            </button>
+                                                ? 'hover:bg-brand bg-green-700 text-white'
+                                                : 'bg-white/5 text-zinc-500 cursor-not-allowed border border-white/5'}`}
+                                    >
+                                        Place Order
+                                        <FaArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => taost.error("No Payment method are available!")}
+                                        disabled={allocatedTotal !== totalCartQty}
+                                        className={`group w-full flex items-center justify-center gap-3 py-4.5 font-bold rounded-2xl transition-all duration-300 cursor-pointer
+                                    ${allocatedTotal === totalCartQty
+                                                ? 'bg-brand hover:bg-green-700 text-white shadow-lg shadow-brand/20'
+                                                : 'bg-white/5 text-zinc-500 cursor-not-allowed border border-white/5'}`}
+                                    >
+                                        No Payment method are available!
+                                    </button>
+                                )
+                            }
                         </section>
                     </div>
 
                     {/* Right Column: Order Summary */}
                     <aside className="lg:col-span-4 lg:sticky lg:top-8">
-                        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
+                        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-2 sm:p-3 shadow-2xl">
                             <h2 className="text-xl font-bold mb-8 flex items-center gap-3">
                                 <FaShoppingBag className="text-brand/60" size={18} />
                                 Order Summary
@@ -335,11 +390,11 @@ export default function CheckoutPage() {
                                             </div>
 
                                             {item.selectedAddons && item.selectedAddons.length > 0 && (
-                                                <div className="mt-2 text-[10px] space-y-0.5">
+                                                <div className="mt-3 text-[10px] space-y-0.5">
                                                     {item.selectedAddons.map((addon, aIdx) => (
-                                                        <div key={aIdx} className="flex justify-between text-zinc-400 italic">
+                                                        <div key={aIdx} className="flex justify-between text-zinc-300">
                                                             <span>+ {addon.name}</span>
-                                                            <span className="text-zinc-500 ml-2">{symbol} {parseFloat(addon.price) || 0}</span>
+                                                            <span className="text-zinc-300 ml-2">{symbol} {parseFloat(addon.price) || 0}</span>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -375,10 +430,16 @@ export default function CheckoutPage() {
                                     <span className="text-base font-bold text-white">Total</span>
                                     <span className="text-2xl font-black text-white tracking-tight">{symbol} {grandTotal.toFixed(2)}</span>
                                 </div>
+                                {totalPrice < minOrderAmount && (
+                                    <div className="mt-2 text-red-500 font-bold text-[12px] text-center">
+                                        Minimum order amount is {symbol} {minOrderAmount}
+                                    </div>
+                                )}
+
                             </div>
 
-                            <div className="mt-8 flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.02] border border-white/5 text-[10px] text-zinc-400 justify-center uppercase tracking-widest font-bold">
-                                <FaShieldAlt className="text-brand/50" />
+                            <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.02] border border-white/5 text-[10px] text-zinc-400 justify-center uppercase tracking-widest font-bold">
+                                <FaShieldAlt />
                                 <span>Encrypted & Secure</span>
                             </div>
                         </div>
@@ -386,5 +447,14 @@ export default function CheckoutPage() {
                 </div>
             </div >
         </div >
+    );
+}
+
+
+const Loader = () => {
+    return (
+        <div className="fixed inset-0 bg-black /50 backdrop-blur-xs flex gap-2 items-center justify-center z-50">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-l-2 border-brand"></div>
+        </div>
     );
 }
