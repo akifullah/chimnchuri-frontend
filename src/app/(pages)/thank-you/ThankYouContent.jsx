@@ -78,6 +78,8 @@ const ThankYouContent = () => {
         customer_email,
         customer_phone,
         delivery_address,
+        city,
+        postal_code,
         payment_method,
         time_slots
     } = order;
@@ -358,7 +360,7 @@ const ThankYouContent = () => {
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-[10px] font-bold uppercase tracking-widest text-brand">Shipping Address</p>
-                                            <p className="text-sm text-zinc-300 leading-relaxed font-medium">{delivery_address}</p>
+                                            <p className="text-sm text-zinc-300 leading-relaxed font-medium">{delivery_address}, {city}, {postal_code}</p>
                                         </div>
                                     </div>
                                 </div>

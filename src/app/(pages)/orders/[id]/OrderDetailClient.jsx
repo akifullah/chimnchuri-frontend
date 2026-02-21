@@ -150,10 +150,10 @@ const OrderDetailClient = () => {
                                                     <div>
                                                         <h4 className="font-black text-white text-lg mb-2 truncate capitalize group-hover:text-brand transition-colors">{item.item_name}</h4>
                                                         <div className="flex flex-wrap items-center gap-4">
-                                                            <div className="bg-white/[0.05] px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                                                            <div className="bg-white/[0.05] px-3 py-1 rounded-lg text-[10px] font-bold capitalize tracking-widest text-zinc-400">
                                                                 Size: <span className="text-zinc-200">{item.size_name}</span>
                                                             </div>
-                                                            <div className="bg-white/[0.05] px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                                                            <div className="bg-white/[0.05] px-3 py-1 rounded-lg text-[10px] font-bold capitalize tracking-widest text-zinc-400">
                                                                 Qty: <span className="text-zinc-200">{item.quantity}</span>
                                                             </div>
                                                         </div>
@@ -174,15 +174,15 @@ const OrderDetailClient = () => {
                                                             }, {})
                                                         ).map(([categoryName, addons]) => (
                                                             <div key={categoryName}>
-                                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 mb-2">{categoryName}</p>
+                                                                <p className="text-[10px] font-black capitalize  text-zinc-300 mb-2">{categoryName}</p>
                                                                 <div className="space-y-2 pl-4 border-l-2 border-brand/20">
                                                                     {addons.map((addon) => (
                                                                         <div key={addon.id} className="flex justify-between items-center text-xs">
-                                                                            <span className="text-zinc-400 font-bold flex items-center gap-2">
+                                                                            <span className="text-zinc-300 font-bold flex items-center gap-2">
                                                                                 <span className="w-1.5 h-1.5 rounded-full bg-brand" />
                                                                                 {addon.name}
                                                                             </span>
-                                                                            <span className="text-zinc-500 font-black">
+                                                                            <span className="text-zinc-300 font-black">
                                                                                 {addon.quantity} × {symbol} {addon.price}
                                                                             </span>
                                                                         </div>
@@ -198,6 +198,41 @@ const OrderDetailClient = () => {
                                 ))}
                             </div>
                         </div>
+
+                        {/* time slots */}
+                        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+                            <div className="px-6 py-5 border-b border-white/5">
+                                <h3 className="font-bold flex items-center gap-2">
+                                    <MdOutlineDescription className="text-brand" size={18} />
+                                    Time Slots
+                                </h3>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                {order?.time_slots && order?.time_slots.length > 0 ? (
+                                    order?.time_slots.map((slot) => (
+                                        <div key={slot.id} className="flex justify-between items-center p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                            <div className="space-y-1">
+                                                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Time Window</p>
+                                                <p className="text-sm font-medium text-zinc-200">
+                                                    {slot.start_time} — {slot.end_time}
+                                                </p>
+                                            </div>
+                                            <div className="text-right space-y-1">
+                                                <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Capacity</p>
+                                                <span className="inline-flex items-center text-[14px] font-bold text-white">
+                                                    {slot.capacity}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-4 text-zinc-500 text-sm italic">
+                                        No time slots assigned.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                     </div>
 
                     {/* Right Column: Totals & Delivery */}
@@ -281,7 +316,7 @@ const OrderDetailClient = () => {
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Shipping Address</p>
-                                            <p className="text-sm text-zinc-300 font-bold leading-relaxed">{order.delivery_address}</p>
+                                            <p className="text-sm text-zinc-300 font-bold leading-relaxed">{order.delivery_address}, {order.city}, {order.postal_code} </p>
                                         </div>
                                     </div>
                                 </div>
