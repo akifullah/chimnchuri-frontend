@@ -142,7 +142,7 @@ const Footer = () => {
                 </div>
             </div>
             <div className="border-b border-gray-600/40 my-4"></div>
-            <div className="container mx-auto pb-4">
+            <div className="container mx-auto pb-4 px-2 md:px-4">
                 <div className="flex gap-3 text-center md:text-left flex-col md:flex-row items-center justify-center md:justify-between">
                     <p>Copyright © {new Date().getFullYear()} {settings?.restaurant_name} all Right Reserved</p>
 
