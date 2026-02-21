@@ -21,7 +21,7 @@ const Footer = () => {
                                 <Link className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-brand transition ease duration-200 inline-block' href={"#"}>Delivery</Link>
                             </li>
                             <li className=''>
-                                <Link className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-brand transition ease duration-200 inline-block' href={"#"}>Contact</Link>
+                                <Link className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-brand transition ease duration-200 inline-block' href={"/contact"}>Contact</Link>
                             </li>
                             <li className=''>
                                 <Link className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-brand transition ease duration-200 inline-block' href={"#"}>Store Locator</Link>
@@ -33,13 +33,13 @@ const Footer = () => {
                         <h3 className='text-xl lg:text-2xl font-bold mb-2 md:mb-4'>About US</h3>
                         <ul>
                             <li className=''>
-                                <Link className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-brand transition ease duration-200 inline-block' href={"#"}>FAQs</Link>
+                                <Link className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-brand transition ease duration-200 inline-block' href={"/about"}>Our Story</Link>
                             </li>
                             <li className=''>
                                 <Link className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-brand transition ease duration-200 inline-block' href={"#"}>Delivery</Link>
                             </li>
                             <li className=''>
-                                <Link className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-brand transition ease duration-200 inline-block' href={"#"}>Contact</Link>
+                                <Link className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-brand transition ease duration-200 inline-block' href={"/contact"}>Contact</Link>
                             </li>
                             <li className=''>
                                 <Link className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-brand transition ease duration-200 inline-block' href={"#"}>Store Locator</Link>
@@ -146,11 +146,9 @@ const Footer = () => {
                 <div className="flex gap-3 text-center md:text-left flex-col md:flex-row items-center justify-center md:justify-between">
                     <p>Copyright © {new Date().getFullYear()} {settings?.restaurant_name} all Right Reserved</p>
 
-
-
-                    <div className="flex items-center gap-4">
-                        <a href="#">Privacy Policy</a>
-                        <a href="#">Terms & Conditions</a>
+                    <div className="flex items-center gap-4 text-xs font-semibold">
+                        <Link href="/privacy" className="hover:text-brand transition-colors">Privacy Policy</Link>
+                        <Link href="/terms" className="hover:text-brand transition-colors">Terms & Conditions</Link>
                     </div>
                 </div>
             </div>
