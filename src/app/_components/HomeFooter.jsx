@@ -11,9 +11,10 @@ const HomeFooter = () => {
         <>
             <section className="py-10 lg:py-20">
                 <div className="max-w-xl mx-auto text-center  font-bold uppercase">
-                    <h3 className="text-3xl md:text-5xl text-brand text-shadow-lg uppercase ">{settings?.restaurant_name}</h3>
+                    <img src={process.env.NEXT_PUBLIC_BASE_URL + "/" + settings?.restaurant_logo} className='h-[100px] mx-auto' alt="" />
+                    {/* <h3 className="text-3xl md:text-5xl text-brand text-shadow-lg uppercase ">{settings?.restaurant_name}</h3> */}
 
-                    <div className="flex flex-wrap items-center justify-center gap-5 font-bold text-md mt-5">
+                    <div className="flex flex-wrap items-center justify-center gap-5 font-bold text-md mt-8">
                         <Link href="/" className="text-white hover:text-brand transition-all duration-500">Home</Link>
                         <Link href="/categories" className="text-white hover:text-brand transition-all duration-500">Menu</Link>
                         <Link href="/categories" className="text-white hover:text-brand transition-all duration-500">Our Food</Link>

@@ -8,7 +8,24 @@ import { toggleCart } from '@/store/features/cartSlice'
 import { useSettings } from '../providers/SettingsProvider'
 import { useOffer } from '@/hooks/useOffer'
 
+import { useQueryClient } from '@tanstack/react-query'
+
+
+
 const Header = () => {
+
+    const queryClient = useQueryClient();
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('cache') === 'clear') {
+            queryClient.clear();
+        }
+    }, [queryClient]);
+
+
+
+
     const { data: offerData, isLoading: offerLoading, error: offerError } = useOffer();
 
     const [mounted, setMounted] = useState(false)
