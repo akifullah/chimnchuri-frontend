@@ -47,7 +47,7 @@ const Header = () => {
     return (
         <>
             <SidebarCart />
-            <header className='px-2 py-1 lg:py-4 xl:px-28 bg-brand text-white'>
+            <header className='px-2 py-1 lg:py-0 xl:px-28 bg-brand text-white'>
                 <div className="container mx-auto flex items-center justify-between relative">
 
                     <a href="/">
