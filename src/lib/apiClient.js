@@ -1,9 +1,8 @@
 
 export async function apiClient(url, options = {}) {
-    const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000/api';
+    const baseUrl = '/api/v1/frontend';
     const response = await fetch(`${baseUrl}${url}`, {
         ...options,
-        credentials: "include",
         headers: {
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -36,7 +35,7 @@ export async function apiClient(url, options = {}) {
 async function refreshAccessToken() {
     try {
         const res = await fetch(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/refresh`,
+            `/api/v1/frontend/refresh`,
             {
                 method: "POST",
                 credentials: "include",
