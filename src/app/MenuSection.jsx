@@ -450,7 +450,7 @@ export default function MenuSection() {
 
         @media (max-width: 768px) {
           .hero-steak {
-            min-height: auto;
+            min-height: 80vh;
             padding: 0;
           }
           .steak-stage { 
@@ -460,14 +460,14 @@ export default function MenuSection() {
           .steak-container { 
             width: 85vw; 
             height: auto;
-            aspect-ratio: 440 / 620;
+            aspect-ratio: 440 / 420;
           }
           .card-label { 
             font-size: 2.4rem; 
             letter-spacing: 6px; 
           }
-          .is-open .slice-1 { transform: translateY(-150px) scale(1.02); }
-          .is-open .slice-3 { transform: translateY(150px) scale(1.02); }
+          .is-open .slice-1 { transform: translateY(-80px) scale(1.02); }
+          .is-open .slice-3 { transform: translateY(80px) scale(1.02); }
           .plate-glow {
             width: 80vw;
             height: 80vw;
@@ -486,14 +486,14 @@ export default function MenuSection() {
           .steak-container { 
             width: 90vw; 
             height: auto;
-            aspect-ratio: 440 / 620;
+            aspect-ratio: 440 / 420;
           }
           .card-label { 
             font-size: 2.2rem; 
             letter-spacing: 5px; 
           }
-          .is-open .slice-1 { transform: translateY(-130px) scale(1.02); }
-          .is-open .slice-3 { transform: translateY(130px) scale(1.02); }
+          .is-open .slice-1 { transform: translateY(-70px) scale(1.02); }
+          .is-open .slice-3 { transform: translateY(70px) scale(1.02); }
         }
 
         @media (max-width: 360px) {
