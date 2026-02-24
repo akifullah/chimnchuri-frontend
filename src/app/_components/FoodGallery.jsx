@@ -2,10 +2,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 
 const images = [
-    "/gallery/1.jpg",
-    "/gallery/2.jpg",
-    "/gallery/3.jpg",
-    "/gallery/4.jpg",
+    "/gallery/1.jpeg",
+    "/gallery/2.jpeg",
+    "/gallery/3.jpeg",
+    "/gallery/4.jpeg",
 ];
 
 const FoodGallery = () => {
@@ -100,19 +100,6 @@ const FoodGallery = () => {
                         </svg>
                     </button>
 
-                    {/* Dots */}
-                    <div className="flex justify-center gap-2 mt-4">
-                        {images.map((_, i) => (
-                            <button
-                                key={i}
-                                onClick={() => setCurrent(i)}
-                                className={`w-2 h-2 rounded-full transition-all duration-300 ${i === current
-                                        ? "bg-green-500 w-6"
-                                        : "bg-white/20 hover:bg-white/40"
-                                    }`}
-                            />
-                        ))}
-                    </div>
                 </div>
             </div>
         </section>

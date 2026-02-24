@@ -47,12 +47,12 @@ const Header = () => {
     return (
         <>
             <SidebarCart />
-            <header className='px-2 py-4 xl:px-28 bg-brand text-white'>
+            <header className='px-2 py-1 lg:py-4 xl:px-28 bg-brand text-white'>
                 <div className="container mx-auto flex items-center justify-between">
 
                     <a href="/">
                         {/* <Image src={settings?.restaurant_logo ? `${process.env.NEXT_PUBLIC_BASE_URL}/${settings?.restaurant_logo}` : "/logo-light.png"} alt="Chim 'N' Churri " width={100} height={60} /> */}
-                        <img src={`${process.env.NEXT_PUBLIC_BASE_URL}/${settings?.restaurant_logo}`} onError={(e) => e.target.src = "/logo-light.png"} alt="Chim 'N' Churri " className='size-[100px]' />
+                        <img src={`${process.env.NEXT_PUBLIC_BASE_URL}/${settings?.restaurant_logo}`} onError={(e) => e.target.src = "/logo-light.png"} alt="Chim 'N' Churri " className='size-[50px] lg:size-[100px]' />
                     </a>
 
                     <ul className='hidden lg:flex lg:relative items-center gap-8 font-medium text-xl'>
@@ -64,14 +64,14 @@ const Header = () => {
                         >Order Online</Link></li>
                     </ul>
 
-                    <div className="flex items-center text-xs md:text-[14px] gap-3 md:gap-6">
+                    <div className="flex items-center text-xs md:text-[14px] gap-5 md:gap-6">
                         {auth?.isAuthenticated && mounted ? (
                             <Link href={"/profile"} className='flex items-center gap-2'>
                                 <FaUser size={20} /> {auth?.user?.name}
                             </Link>
                         ) : (
                             <Link href={"/login"} className='flex items-center gap-2'>
-                                <FaUser size={20} /> Sign in
+                                <FaUser size={20} />
                             </Link>
                         )}
 

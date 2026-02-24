@@ -16,7 +16,7 @@ const HeroSection = () => {
     return (
         <>
             <section>
-                <div className="bg-brand py-0 min-h-[20vh] lg:min-h-[50vh] flex items-center justify-center">
+                <div className="bg-brand py-0 min-h-[10vh] lg:min-h-[50vh] flex items-center justify-center">
                     <div className="flex justify-center">
 
                         <img src={settings?.restaurant_logo ? `${process.env.NEXT_PUBLIC_BASE_URL}/${settings?.restaurant_logo}` : "/logo-light.png"} className='max-w-[80vw]  sm:max-w-[50vw] md:max-w-[30vw] mx-auto' onError={(e) => e.target.src = "/logo-light.png"} alt="Chim 'N' Churri " />
