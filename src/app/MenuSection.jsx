@@ -10,6 +10,7 @@ function SteakSVG({ id }) {
       viewBox="0 0 440 350"
       xmlns="http://www.w3.org/2000/svg"
       className="steak-vector"
+      preserveAspectRatio="xMidYMid meet"
     >
       <defs>
         <linearGradient id={`${id}-side`} x1="0%" y1="0%" x2="0%" y2="100%">
@@ -299,7 +300,7 @@ export default function MenuSection() {
           position: absolute;
           top: -80px;
           left: 50%;
-          transform: translateX(-50%) rotate(90deg);
+          transform: translateX(-50%);
           z-index: 30;
           opacity: 0;
           pointer-events: none;
@@ -316,12 +317,12 @@ export default function MenuSection() {
         }
 
         @keyframes knifeSlice {
-          0% { top: -80px; opacity: 0; transform: translateY(0) translateX(240px) rotate(90deg); }
-          30% { top: 50%; opacity: 1; transform: translateY(-50%) translateX(240px) rotate(90deg); }
-          50% { top: 50%; transform: translateY(-50%) translateX(240px) rotate(90deg); }
-          75% { top: 50%; transform: translateY(-50%) translateX(-240px) rotate(90deg); }
+          0% { top: -80px; opacity: 0; transform: translateX(-50%) rotate(0deg); }
+          30% { top: -20px; opacity: 1; transform: translateX(-50%) rotate(0deg); }
+          50% { top: -20px; transform: translateX(-50%) rotate(0deg); }
+          75% { top: 110%; transform: translateX(-50%) rotate(0deg); }
           85% { opacity: 1; }
-          100% { top: 50%; opacity: 0; transform: translateY(-50%) translateX(-300px) rotate(90deg); }
+          100% { top: 120%; opacity: 0; transform: translateX(-50%) rotate(0deg); }
         }
 
         .steak-container {
@@ -329,6 +330,7 @@ export default function MenuSection() {
           width: 400px;
           height: 320px;
           z-index: 15;
+          overflow: visible;
         }
 
         .steak-graphic {
@@ -354,21 +356,22 @@ export default function MenuSection() {
           overflow: hidden;
         }
 
-        .slice-1 { clip-path: inset(0 66.66% 0 0); z-index: 3; }
-        .slice-2 { clip-path: inset(0 33.33% 0 33.33%); z-index: 2; }
-        .slice-3 { clip-path: inset(0 0 0 66.66%); z-index: 1; }
+        /* Horizontal bands: top / middle / bottom */
+        .slice-1 { clip-path: inset(0 0 66.66% 0); z-index: 3; }
+        .slice-2 { clip-path: inset(33.33% 0 33.33% 0); z-index: 2; }
+        .slice-3 { clip-path: inset(66.66% 0 0 0); z-index: 1; }
 
-        .is-open .slice-1 { transform: translateX(-70px) translateY(-10px); transition-delay: 0.5s; }
-        .is-open .slice-2 { transform: translateY(15px); transition-delay: 0.6s; }
-        .is-open .slice-3 { transform: translateX(70px) translateY(-5px); transition-delay: 0.7s; }
+        .is-open .slice-1 { transform: translateY(-120px) scale(1.02); transition-delay: 0.5s; }
+        .is-open .slice-2 { transform: translateY(0px) scale(1.02); transition-delay: 0.6s; }
+        .is-open .slice-3 { transform: translateY(120px) scale(1.02); transition-delay: 0.7s; }
 
         .is-open .steak-vector { opacity: 0.3; transition-delay: 0.6s; }
 
         .slice-card {
           position: absolute;
-          top: 0;
-          bottom: 0;
-          width: 33.33%;
+          left: 0;
+          right: 0;
+          height: 33.33%;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -381,9 +384,9 @@ export default function MenuSection() {
           z-index: 5;
         }
 
-        .slice-1 .slice-card { left: 0; }
-        .slice-2 .slice-card { left: 33.33%; }
-        .slice-3 .slice-card { left: 66.66%; }
+        .slice-1 .slice-card { top: 0; }
+        .slice-2 .slice-card { top: 33.33%; }
+        .slice-3 .slice-card { top: 66.66%; }
 
         .is-open .slice-card {
           opacity: 1;
@@ -404,7 +407,6 @@ export default function MenuSection() {
           transition: all 0.3s ease;
           text-shadow: 0 2px 15px rgba(0, 0, 0, 0.8);
           text-align: center;
-          transform: rotate(0deg);
           white-space: nowrap;
           display: block;
         }
@@ -418,64 +420,95 @@ export default function MenuSection() {
           opacity: 0.15 !important;
         }
 
+        /* Horizontal cut lines */
         .cut-line {
           position: absolute;
-          top: 8%;
-          width: 2px;
-          height: 84%;
-          background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.6), rgba(201, 169, 110, 0.4), transparent);
+          left: 8%;
+          height: 2px;
+          width: 84%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), rgba(201, 169, 110, 0.4), transparent);
           opacity: 0;
           z-index: 20;
           pointer-events: none;
           filter: blur(0.5px);
         }
 
-        .cut-line-1 { left: calc(50% - 53px); }
-        .cut-line-2 { left: calc(50% + 53px); }
+        .cut-line-1 { top: calc(33.33% - 1px); }
+        .cut-line-2 { top: calc(66.66% - 1px); }
 
         .is-open .cut-line-1 { animation: cutFlash 0.6s ease 0.55s forwards; }
         .is-open .cut-line-2 { animation: cutFlash 0.6s ease 0.65s forwards; }
 
         @keyframes cutFlash {
-          0% { opacity: 0; transform: scaleY(0); }
-          30% { opacity: 1; transform: scaleY(1); }
-          100% { opacity: 0; transform: scaleY(1.2); }
+          0% { opacity: 0; transform: scaleX(0); }
+          30% { opacity: 1; transform: scaleX(1); }
+          100% { opacity: 0; transform: scaleX(1.2); }
         }
 
 
 
 
         @media (max-width: 768px) {
-          .steak-stage { width: 340px; height: 340px; }
-          .steak-container { width: 310px; height: 260px; }
-          .card-label { font-size: 1.2rem; }
-          .is-open .slice-1 { transform: translateX(-50px) translateY(-5px); }
-          .is-open .slice-3 { transform: translateX(50px) translateY(-5px); }
+          .hero-steak {
+            min-height: 100vh;
+          }
+          .steak-stage { 
+            width: 90vw; 
+            height: 85vh; 
+          }
+          .steak-container { 
+            width: 85vw; 
+            height: auto;
+            aspect-ratio: 440 / 350;
+          }
+          .card-label { 
+            font-size: 2.4rem; 
+            letter-spacing: 6px; 
+          }
+          .is-open .slice-1 { transform: translateY(-100px) scale(1.02); }
+          .is-open .slice-3 { transform: translateY(100px) scale(1.02); }
+          .plate-glow {
+            width: 80vw;
+            height: 80vw;
+          }
+          .is-open .plate-glow {
+            width: 95vw;
+            height: 95vw;
+          }
         }
 
         @media (max-width: 480px) {
           .hero-steak {
-            min-height: 50vh;
+            min-height: 100vh;
           }
           .steak-stage { 
-            width: 280px; 
-            height: 280px; 
-            transform: scale(0.9);
+            width: 95vw; 
+            height: 80vh; 
           }
           .steak-container { 
-            width: 250px; 
-            height: 200px; 
+            width: 90vw; 
+            height: auto;
+            aspect-ratio: 440 / 350;
           }
-          .card-label { font-size: 1rem; letter-spacing: 3px; }
-          .is-open .slice-1 { transform: translateX(-40px); }
-          .is-open .slice-3 { transform: translateX(40px); }
-          .hero-hint { font-size: 0.65rem; letter-spacing: 3px; }
+          .card-label { 
+            font-size: 2.2rem; 
+            letter-spacing: 5px; 
+          }
+          .is-open .slice-1 { transform: translateY(-90px) scale(1.02); }
+          .is-open .slice-3 { transform: translateY(90px) scale(1.02); }
         }
 
         @media (max-width: 360px) {
           .steak-stage { 
-            transform: scale(0.75);
-            margin: -40px 0;
+            width: 98vw;
+            height: 75vh;
+          }
+          .steak-container {
+            width: 92vw;
+          }
+          .card-label { 
+            font-size: 1.8rem; 
+            letter-spacing: 4px; 
           }
         }
       `}</style>
