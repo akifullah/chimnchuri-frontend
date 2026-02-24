@@ -48,7 +48,7 @@ const Header = () => {
         <>
             <SidebarCart />
             <header className='px-2 py-1 lg:py-4 xl:px-28 bg-brand text-white'>
-                <div className="container mx-auto flex items-center justify-between">
+                <div className="container mx-auto flex items-center justify-between relative">
 
                     <a href="/">
                         {/* <Image src={settings?.restaurant_logo ? `${process.env.NEXT_PUBLIC_BASE_URL}/${settings?.restaurant_logo}` : "/logo-light.png"} alt="Chim 'N' Churri " width={100} height={60} /> */}
@@ -60,7 +60,7 @@ const Header = () => {
                         <li><Link href={"/about"}>About</Link></li>
                         <li><Link href={"/contact"}>Contact</Link></li>
                         <li><Link href={"/categories"}
-                            className='px-6 py-2.5 rounded-[5px] text-base font-semibold bg-white text-brand border-none hover:bg-white/90 transition-all duration-300 flex items-center justify-center leading-none'
+                            className='px-6 pt-2.5 pb-1.5 rounded-[5px] text-base font-semibold bg-white text-brand border-none hover:bg-white/90 transition-all duration-300 flex items-center justify-center leading-none'
                         >Order Online</Link></li>
                     </ul>
 
