@@ -20,7 +20,7 @@
     }
 
     20% {
-      transform: translateY(-80px);
+      transform: translateY(-40px);
     }
 
     40% {
@@ -32,6 +32,8 @@
     }
   }
 }
+
+
 
 /* @media (prefers-color-scheme: dark) {
   :root {

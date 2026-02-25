@@ -14,7 +14,7 @@ export default function Home() {
       <div className="flex flex-col border-t border-brand/90 justify-between min-h-dvh">
         <HeroSection />
 
-        <BrandBanner />
+        {/* <BrandBanner /> */}
         <section>
           <MenuSection />
         </section>
