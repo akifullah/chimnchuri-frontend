@@ -203,7 +203,7 @@ export default function MenuSection() {
   }, []);
 
   return (
-    <section className={`hero-steak ${isOpen ? "is-open" : ""}`} id="hero" ref={heroRef}>
+    <section className={`hero-steak py-20 ${isOpen ? "is-open" : ""}`} id="hero" ref={heroRef}>
       <style>{`
         .hero-steak {
           position: relative;
