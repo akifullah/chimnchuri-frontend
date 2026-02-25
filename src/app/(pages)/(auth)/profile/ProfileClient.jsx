@@ -107,7 +107,7 @@ const ProfileClient = () => {
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
                             <div>
                                 <h1 className="text-2xl font-black tracking-tight mb-1">{userData?.name}</h1>
-                                <p className="text-brand font-bold text-sm tracking-widest uppercase">Premium Customer</p>
+                                {/* <p className="text-brand font-bold text-sm tracking-widest uppercase">Premium Customer</p> */}
                             </div>
                             <Link
                                 href="/profile/edit"
