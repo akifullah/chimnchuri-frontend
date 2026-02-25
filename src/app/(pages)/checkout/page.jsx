@@ -7,7 +7,7 @@ import CheckoutForm from "./CheckoutForm";
 import { useDispatch, useSelector } from "react-redux";
 import Img from "@/app/_components/Img";
 import { useForm } from "react-hook-form";
-import { FaMapMarkerAlt, FaCreditCard, FaMoneyBillWave, FaShoppingBag, FaShieldAlt, FaArrowRight, FaPlus, FaMinus } from "react-icons/fa";
+import { FaMapMarkerAlt, FaCreditCard, FaMoneyBillWave, FaShoppingBag, FaShieldAlt, FaArrowRight, FaPlus, FaMinus, FaTruck, FaStore } from "react-icons/fa";
 import { createOrder } from "@/lib/api";
 import { clearCart } from "@/store/features/cartSlice";
 import { useCurrency, useSettings } from "@/app/providers/SettingsProvider";
@@ -19,9 +19,8 @@ import useTimeSlots from "@/hooks/useTimeSlots";
 
 export default function CheckoutPage() {
 
-
-
-    const { data: timeSlots, isLoading: timeSlotsLoading, error: timeSlotsError } = useTimeSlots();
+    const [orderType, setOrderType] = useState("delivery");
+    const { data: timeSlots, isLoading: timeSlotsLoading, error: timeSlotsError } = useTimeSlots(orderType);
     const auth = useSelector((state) => state.authSlice);
 
     const { deliveryFee,
@@ -47,6 +46,11 @@ export default function CheckoutPage() {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const [paymentMethod, setPaymentMethod] = useState("cod");
     const checkoutFormRef = useRef(null);
+
+    // Reset allocations when order type changes
+    useEffect(() => {
+        setAllocations({});
+    }, [orderType]);
     useEffect(() => {
         if (settings) {
             let isCodEnabled = settings?.is_cod_enabled;
@@ -78,6 +82,7 @@ export default function CheckoutPage() {
     const router = useRouter()
     const [loading, setLoading] = useState(false);
     const handlePlaceOrder = async (data) => {
+
         if (grandTotal < minOrderAmount) {
             toast.error(`minimum order amount is ${symbol}${minOrderAmount}`)
             return;
@@ -101,22 +106,29 @@ export default function CheckoutPage() {
             return;
         }
 
-        setLoading(true);
 
         const user_id = auth?.user?.id || null;
+        const effectiveDeliveryFee = orderType === "collection" ? 0 : deliveryFee;
+        const effectiveGrandTotal = totalPrice + effectiveDeliveryFee + taxAmount - discount;
         const formData = {
             ...data,
             payment_method: paymentMethod,
+            order_type: orderType,
             user_id,
             items: items,
             discount: discount,
             tax: taxAmount,
-            delivery_fee: deliveryFee,
-            amount: grandTotal,
+            delivery_fee: effectiveDeliveryFee,
+            amount: effectiveGrandTotal,
             allocations: Object.entries(allocations)
                 .filter(([_, qty]) => qty > 0)
                 .map(([slotId, qty]) => ({ slot_id: slotId, quantity: qty }))
         };
+
+        // console.log(formData);
+        // return;
+
+        setLoading(true);
         if (paymentMethod === "cod") {
             const response = await createOrder(formData);
             if (response.success) {
@@ -174,31 +186,100 @@ export default function CheckoutPage() {
             <div className="max-w-7xl mx-auto relative z-10">
                 <header className="mb-10">
                     <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">Checkout</h1>
-                    <p className="text-zinc-300 text-sm">Complete your order with secure delivery and payment</p>
+                    <p className="text-zinc-300 text-sm">Complete your order with secure {orderType} and payment</p>
                 </header>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                     {/* Left Column: Forms */}
                     <div className="lg:col-span-8 space-y-8">
 
-                        {/* 1. Delivery Address */}
+                        {/* 0. Order Type: Delivery / Collection */}
+                        <section className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-4 sm:p-5 shadow-2xl">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
+                                    <FaShoppingBag className="text-brand" size={14} />
+                                </div>
+                                <h2 className="text-base font-bold">Order Type</h2>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    onClick={() => setOrderType('delivery')}
+                                    type="button"
+                                    className={`relative group flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-300 cursor-pointer
+                                        ${orderType === 'delivery'
+                                            ? 'border-brand bg-brand/10'
+                                            : 'border-white/10 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]'}`}
+                                >
+                                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all ${orderType === 'delivery' ? 'bg-brand text-white shadow-md shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
+                                        <FaTruck size={14} />
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="font-bold text-xs">Delivery</div>
+                                        <p className="text-[10px] text-zinc-400">To your door</p>
+                                    </div>
+                                    {orderType === 'delivery' && (
+                                        <div className="absolute top-2 right-2">
+                                            <div className="w-4 h-4 rounded-full bg-brand flex items-center justify-center text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                            </div>
+                                        </div>
+                                    )}
+                                </button>
+
+                                <button
+                                    onClick={() => setOrderType('collection')}
+                                    type="button"
+                                    className={`relative group flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-300 cursor-pointer
+                                        ${orderType === 'collection'
+                                            ? 'border-brand bg-brand/10'
+                                            : 'border-white/10 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]'}`}
+                                >
+                                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all ${orderType === 'collection' ? 'bg-brand text-white shadow-md shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
+                                        <FaStore size={14} />
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="font-bold text-xs">Collection</div>
+                                        <p className="text-[10px] text-zinc-400">Pick up in store</p>
+                                    </div>
+                                    {orderType === 'collection' && (
+                                        <div className="absolute top-2 right-2">
+                                            <div className="w-4 h-4 rounded-full bg-brand flex items-center justify-center text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                            </div>
+                                        </div>
+                                    )}
+                                </button>
+                            </div>
+                            {
+                                orderType === 'collection' && (
+                                    <p className="text-xs text-zinc-400 mt-5">You can collect your order from our store at <span className="text-white">{settings?.address}, {settings?.postcode}, {settings?.city}</span> </p>
+                                )
+                            }
+                        </section>
+
+                        {/* 1. Customer Details & Address */}
                         <section className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
                             <div className="flex items-center gap-4 mb-8">
                                 <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center">
                                     <FaMapMarkerAlt className="text-brand" size={18} />
                                 </div>
-                                <h2 className="text-xl font-bold">Delivery Address</h2>
+                                <h2 className="text-xl font-bold">{orderType === 'delivery' ? 'Delivery Details' : 'Collection Details'}</h2>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <InputField label="Full name" name="full_name" placeholder="John Doe" options={{ required: "Name is required" }} />
                                 <InputField label="Email" name="email" placeholder="Email Address" options={{ required: "Email is required" }} />
                                 <InputField label="Phone Number" name="phone" placeholder="+44 7700 900000" options={{ required: "Phone is required" }} />
-                                <div className="md:col-span-2">
-                                    <InputField label="Street Address" name="street_address" placeholder="123 Food Street, Block A" options={{ required: "Address is required" }} />
-                                </div>
-                                <InputField label="City" name="city" placeholder="London" options={{ required: "City is required" }} />
-                                <InputField label="Postal Code" name="postal_code" placeholder="SW1A 0AA" />
+                                {orderType === 'delivery' && (
+                                    <>
+                                        <div className="md:col-span-2">
+                                            <InputField label="Street Address" name="street_address" placeholder="123 Food Street, Block A" options={{ required: orderType === 'delivery' ? "Address is required" : false }} />
+                                        </div>
+                                        <InputField label="City" name="city" placeholder="London" options={{ required: orderType === 'delivery' ? "City is required" : false }} />
+                                        <InputField label="Postal Code" name="postal_code" placeholder="SW1A 0AA" />
+                                    </>
+                                )}
 
                                 <div className="md:col-span-2 space-y-4">
                                     <div className="flex justify-between items-end">
@@ -253,16 +334,18 @@ export default function CheckoutPage() {
                                     {allocatedTotal !== totalCartQty && <p className="text-[12px] text-red-400 font-medium">* Total items ({totalCartQty}) must be fully allocated.</p>}
                                 </div>
 
-                                <div className="md:col-span-2 space-y-1.5">
-                                    <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Delivery Instructions (Optional)</label>
-                                    <textarea
-                                        {...register("delivery_instructions")}
-                                        placeholder="Ring the doorbell, leave at gate, etc..."
-                                        className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/10 rounded-xl text-white placeholder-zinc-400 text-sm
-                                            focus:outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 focus:bg-white/[0.08]
-                                            transition-all duration-300 hover:border-white/20 min-h-[100px] resize-none"
-                                    />
-                                </div>
+                                {orderType === 'delivery' && (
+                                    <div className="md:col-span-2 space-y-1.5">
+                                        <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Delivery Instructions (Optional)</label>
+                                        <textarea
+                                            {...register("delivery_instructions")}
+                                            placeholder="Ring the doorbell, leave at gate, etc..."
+                                            className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/10 rounded-xl text-white placeholder-zinc-400 text-sm
+                                                focus:outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 focus:bg-white/[0.08]
+                                                transition-all duration-300 hover:border-white/20 min-h-[100px] resize-none"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </section>
 
@@ -290,9 +373,9 @@ export default function CheckoutPage() {
                                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${paymentMethod === 'cod' ? 'bg-brand text-white shadow-lg shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
                                                     <FaMoneyBillWave size={18} />
                                                 </div>
-                                                <div className="font-bold text-sm">Cash on Delivery</div>
+                                                <div className="font-bold text-sm">{orderType === 'collection' ? 'Pay on Collection' : 'Cash on Delivery'}</div>
                                             </div>
-                                            <p className="text-xs text-zinc-400 leading-relaxed">Pay with cash when your delicious food arrives at your doorstep.</p>
+                                            <p className="text-xs text-zinc-400 leading-relaxed">{orderType === 'collection' ? 'Pay when you collect your order from our store.' : 'Pay with cash when your delicious food arrives at your doorstep.'}</p>
                                             {paymentMethod === 'cod' && (
                                                 <div className="absolute top-4 right-4 text-brand">
                                                     <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center text-white">
@@ -426,9 +509,19 @@ export default function CheckoutPage() {
                                     <span className="text-zinc-200">{symbol} {totalPrice.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-sm text-zinc-300">
-                                    <span>Delivery Fee</span>
-                                    <span className="text-zinc-200">{symbol} {deliveryFee.toFixed(2)}</span>
+                                    <span>{orderType === 'collection' ? 'Delivery Fee' : 'Delivery Fee'}</span>
+                                    {orderType === 'collection' ? (
+                                        <span className="text-green-400 line-through opacity-60">{symbol} {deliveryFee.toFixed(2)}</span>
+                                    ) : (
+                                        <span className="text-zinc-200">{symbol} {deliveryFee.toFixed(2)}</span>
+                                    )}
                                 </div>
+                                {/* {orderType === 'collection' && (
+                                    <div className="flex justify-between text-sm text-green-400">
+                                        <span>Collection Savings</span>
+                                        <span>- {symbol} {deliveryFee.toFixed(2)}</span>
+                                    </div>
+                                )} */}
 
                                 <div className="flex justify-between text-sm text-green-500">
                                     <span>Discount</span>
@@ -442,7 +535,7 @@ export default function CheckoutPage() {
 
                                 <div className="flex justify-between items-center pt-4 border-t border-white/10">
                                     <span className="text-base font-bold text-white">Total</span>
-                                    <span className="text-2xl font-black text-white tracking-tight">{symbol} {grandTotal.toFixed(2)}</span>
+                                    <span className="text-2xl font-black text-white tracking-tight">{symbol} {(orderType === 'collection' ? grandTotal - deliveryFee : grandTotal).toFixed(2)}</span>
                                 </div>
                                 {totalPrice < minOrderAmount && (
                                     <div className="mt-2 text-red-500 font-bold text-[12px] text-center">

@@ -109,7 +109,7 @@ export const settings = () => apiClient("/settings");
 export const paymentSettings = () => apiClient("/payment-settings");
 
 // time slots
-export const timeSlots = () => apiClient("/time-slots");
+export const timeSlots = (orderType) => apiClient(`/time-slots${orderType ? `?order_type=${orderType}` : ''}`);
 
 
 // PASSWORD RESET

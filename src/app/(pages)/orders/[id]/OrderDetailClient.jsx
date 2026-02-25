@@ -4,7 +4,7 @@ import React from 'react'
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { fetchOrder } from '@/lib/api';
-import { FaShoppingBag, FaArrowLeft, FaCalendarAlt, FaCreditCard, FaMapMarkerAlt, FaUser, FaEnvelope, FaPhoneAlt, FaCheckCircle, FaChevronLeft } from 'react-icons/fa';
+import { FaShoppingBag, FaArrowLeft, FaCalendarAlt, FaCreditCard, FaMapMarkerAlt, FaUser, FaEnvelope, FaPhoneAlt, FaCheckCircle, FaChevronLeft, FaStore } from 'react-icons/fa';
 import { MdOutlineDescription, MdOutlineAttachMoney } from 'react-icons/md';
 import Img from '@/app/_components/Img';
 import { useCurrency } from '@/app/providers/SettingsProvider';
@@ -22,7 +22,7 @@ const OrderDetailClient = () => {
 
     const order = orderResponse?.data;
 
-    const getStatusBadge = (status) => {
+    const getStatusBadge = (status, label) => {
         const statusColors = {
             paid: 'bg-green-500/10 text-green-400 border-green-500/20',
             unpaid: 'bg-red-500/10 text-red-400 border-red-500/20',
@@ -35,9 +35,12 @@ const OrderDetailClient = () => {
         };
         const colorClass = statusColors[status] || 'bg-white/10 text-zinc-400 border-white/10';
         return (
-            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${colorClass}`}>
-                {status}
-            </span>
+            <>
+                <span className='text-sm text-zinc-400'>{label}: </span>
+                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${colorClass}`}>
+                    {status}
+                </span>
+            </>
         );
     };
 
@@ -98,8 +101,8 @@ const OrderDetailClient = () => {
                                     <div className="flex flex-wrap items-center gap-2">
                                         <h1 className="text-xl font-black tracking-tight">Order #{order.order_number}</h1>
                                         <div className="flex gap-2">
-                                            {getStatusBadge(order.order_status)}
-                                            {getStatusBadge(order.payment_status)}
+                                            {getStatusBadge(order.order_status, 'Order')}
+                                            {getStatusBadge(order.payment_status, 'Payment')}
                                         </div>
                                     </div>
                                     <p className="text-zinc-300 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
@@ -107,9 +110,13 @@ const OrderDetailClient = () => {
                                         Placed on {formatDate(order.created_at)}
                                     </p>
                                 </div>
-                                <div className="bg-brand/0 border border-brand/20 px-6 py-3 rounded-2xl text-center">
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-white/60 mb-0.5">Total Amount Paid</p>
-                                    <p className="text-xl font-black text-white">{symbol} {order.grand_total}</p>
+                                <div className="">
+                                    <p className='text-xs mb-2 text-zinc-400 capitalize'>Order Type: <span className='text-white'>{order?.order_type}</span></p>
+
+                                    <div className="bg-brand/0 border border-brand/20 px-6 py-3 rounded-2xl text-center">
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-white/60 mb-0.5">Total Amount Paid</p>
+                                        <p className="text-xl font-black text-white">{symbol} {order.grand_total}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -214,7 +221,7 @@ const OrderDetailClient = () => {
                                             <div className="space-y-1">
                                                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Time Window</p>
                                                 <p className="text-sm font-medium text-zinc-200">
-                                                    {slot.start_time} — {slot.end_time}
+                                                    {slot.start_time}
                                                 </p>
                                             </div>
                                             <div className="text-right space-y-1">
@@ -275,18 +282,18 @@ const OrderDetailClient = () => {
                                 <div className="flex-1">
                                     <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-0.5">Paid Using</p>
                                     <div className="flex items-center justify-between">
-                                        <p className="font-bold text-sm text-zinc-300 capitalize">{order.payment_method === 'cod' ? 'Cash On Delivery' : order.payment_method}</p>
+                                        <p className="font-bold text-sm text-zinc-300 capitalize">{order.payment_method === 'cod' ? (order.order_type === 'collection' ? 'Pay on Collection' : 'Cash On Delivery') : order.payment_method}</p>
                                         {order.payment_status === 'paid' && <FaCheckCircle className="text-green-500" size={14} />}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Delivery Info */}
+                        {/* Delivery / Collection Info */}
                         <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-2xl p-6 shadow-2xl shadow-black/40">
                             <h3 className="text-xs font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-3 border-b border-white/5 pb-4">
-                                <FaMapMarkerAlt className="text-brand" />
-                                Delivery Details
+                                {order.order_type === 'collection' ? <FaStore className="text-brand" /> : <FaMapMarkerAlt className="text-brand" />}
+                                {order.order_type === 'collection' ? 'Collection Details' : 'Delivery Details'}
                             </h3>
 
                             <div className="space-y-6">
@@ -309,25 +316,41 @@ const OrderDetailClient = () => {
                                     </div>
                                 </div>
 
-                                <div className="pt-6 border-t border-white/5">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-6 h-6 bg-brand/10 rounded-full flex items-center justify-center shrink-0 mt-0.5 border border-brand/20">
-                                            <FaMapMarkerAlt className="text-brand" size={10} />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Shipping Address</p>
-                                            <p className="text-sm text-zinc-300 font-bold leading-relaxed">{order.delivery_address}, {order.city}, {order.postal_code} </p>
+                                {order.order_type === 'collection' ? (
+                                    <div className="pt-6 border-t border-white/5">
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-6 h-6 bg-brand/10 rounded-full flex items-center justify-center shrink-0 mt-0.5 border border-brand/20">
+                                                <FaStore className="text-brand" size={10} />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Pickup Address</p>
+                                                <p className="text-sm text-zinc-300 font-bold leading-relaxed">{order.pickup_address || 'Contact store for pickup details.'}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                ) : (
+                                    <>
+                                        <div className="pt-6 border-t border-white/5">
+                                            <div className="flex items-start gap-4">
+                                                <div className="w-6 h-6 bg-brand/10 rounded-full flex items-center justify-center shrink-0 mt-0.5 border border-brand/20">
+                                                    <FaMapMarkerAlt className="text-brand" size={10} />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Shipping Address</p>
+                                                    <p className="text-sm text-zinc-300 font-bold leading-relaxed">{order.delivery_address}, {order.city}, {order.postal_code} </p>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                {order.delivery_instructions && (
-                                    <div className="pt-4 mt-4 border-t border-white/5">
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-2">Instructions</p>
-                                        <p className="text-[11px] text-zinc-400 italic font-medium leading-relaxed bg-black/20 p-3 rounded-xl border border-white/5">
-                                            "{order.delivery_instructions}"
-                                        </p>
-                                    </div>
+                                        {order.delivery_instructions && (
+                                            <div className="pt-4 mt-4 border-t border-white/5">
+                                                <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-2">Instructions</p>
+                                                <p className="text-[11px] text-zinc-400 italic font-medium leading-relaxed bg-black/20 p-3 rounded-xl border border-white/5">
+                                                    "{order.delivery_instructions}"
+                                                </p>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>
