@@ -334,18 +334,21 @@ export default function CheckoutPage() {
                                     {allocatedTotal !== totalCartQty && <p className="text-[12px] text-red-400 font-medium">* Total items ({totalCartQty}) must be fully allocated.</p>}
                                 </div>
 
-                                {orderType === 'delivery' && (
-                                    <div className="md:col-span-2 space-y-1.5">
-                                        <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Delivery Instructions (Optional)</label>
-                                        <textarea
-                                            {...register("delivery_instructions")}
-                                            placeholder="Ring the doorbell, leave at gate, etc..."
-                                            className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/10 rounded-xl text-white placeholder-zinc-400 text-sm
-                                                focus:outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 focus:bg-white/[0.08]
-                                                transition-all duration-300 hover:border-white/20 min-h-[100px] resize-none"
-                                        />
+                                <div className="md:col-span-2 space-y-1.5">
+                                    <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Order Instructions (Optional)</label>
+                                    <textarea
+                                        {...register("order_instruction")}
+                                        placeholder={orderType === 'collection' ? 'Any special requests for your order...' : 'Ring the doorbell, leave at gate, etc...'}
+                                        className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/10 rounded-xl text-white placeholder-zinc-400 text-sm
+                                            focus:outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 focus:bg-white/[0.08]
+                                            transition-all duration-300 hover:border-white/20 min-h-[100px] resize-none"
+                                    />
+                                    {/* Allergens Notice */}
+                                    <div className="bg-yellow-50/10 border border-yellow-500/20 rounded-xl p-4 mb-4">
+                                        <p className="text-xs text-yellow-400 font-bold uppercase tracking-wider mb-1">⚠️ Allergens Notice</p>
+                                        <p className="text-[11px] text-yellow-300/80 leading-relaxed">Our food may contain or come into contact with common allergens such as nuts, gluten, dairy, eggs, soy, and shellfish. Please inform us of any allergies before placing your order.</p>
                                     </div>
-                                )}
+                                </div>
                             </div>
                         </section>
 
@@ -428,31 +431,32 @@ export default function CheckoutPage() {
                                 </div>
                             )}
 
-                            {
-                                !!isCodEnabled || !!isOnlineEnabled ? (
-                                    <button
-                                        onClick={handleSubmit(handlePlaceOrder)}
-                                        disabled={allocatedTotal !== totalCartQty || loading}
-                                        className={`group w-full flex items-center justify-center gap-3 py-4.5 font-bold rounded-2xl transition-all duration-300 cursor-pointer
+
+
+                            {isCodEnabled || !!isOnlineEnabled ? (
+                                <button
+                                    onClick={handleSubmit(handlePlaceOrder)}
+                                    disabled={allocatedTotal !== totalCartQty || loading}
+                                    className={`group w-full flex items-center justify-center gap-3 py-4.5 font-bold rounded-2xl transition-all duration-300 cursor-pointer
                                     ${allocatedTotal === totalCartQty
-                                                ? 'hover:bg-brand bg-green-700 text-white'
-                                                : 'bg-white/5 text-zinc-500 cursor-not-allowed border border-white/5'}`}
-                                    >
-                                        Place Order
-                                        <FaArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => taost.error("No Payment method are available!")}
-                                        disabled={allocatedTotal !== totalCartQty}
-                                        className={`group w-full flex items-center justify-center gap-3 py-4.5 font-bold rounded-2xl transition-all duration-300 cursor-pointer
+                                            ? 'hover:bg-brand bg-green-700 text-white'
+                                            : 'bg-white/5 text-zinc-500 cursor-not-allowed border border-white/5'}`}
+                                >
+                                    Place Order
+                                    <FaArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => taost.error("No Payment method are available!")}
+                                    disabled={allocatedTotal !== totalCartQty}
+                                    className={`group w-full flex items-center justify-center gap-3 py-4.5 font-bold rounded-2xl transition-all duration-300 cursor-pointer
                                     ${allocatedTotal === totalCartQty
-                                                ? 'bg-brand hover:bg-green-700 text-white shadow-lg shadow-brand/20'
-                                                : 'bg-white/5 text-zinc-500 cursor-not-allowed border border-white/5'}`}
-                                    >
-                                        No Payment method are available!
-                                    </button>
-                                )
+                                            ? 'bg-brand hover:bg-green-700 text-white shadow-lg shadow-brand/20'
+                                            : 'bg-white/5 text-zinc-500 cursor-not-allowed border border-white/5'}`}
+                                >
+                                    No Payment method are available!
+                                </button>
+                            )
                             }
                         </section>
                     </div>

@@ -240,6 +240,15 @@ const OrderDetailClient = () => {
                             </div>
                         </div>
 
+                        {order.order_instruction && (
+                            <div className="pt-4 mt-4  border-white/5">
+                                <p className="text-sm font-black uppercase tracking-widest text-zinc-400 mb-2">Order Instructions</p>
+                                <p className="text-sm text-zinc-400 font-medium leading-relaxed bg-black/20 p-3 rounded-xl border border-white/5">
+                                    "{order.order_instruction}"
+                                </p>
+                            </div>
+                        )}
+
                     </div>
 
                     {/* Right Column: Totals & Delivery */}
@@ -317,17 +326,21 @@ const OrderDetailClient = () => {
                                 </div>
 
                                 {order.order_type === 'collection' ? (
-                                    <div className="pt-6 border-t border-white/5">
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-6 h-6 bg-brand/10 rounded-full flex items-center justify-center shrink-0 mt-0.5 border border-brand/20">
-                                                <FaStore className="text-brand" size={10} />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Pickup Address</p>
-                                                <p className="text-sm text-zinc-300 font-bold leading-relaxed">{order.pickup_address || 'Contact store for pickup details.'}</p>
+                                    <>
+                                        <div className="pt-6 border-t border-white/5">
+                                            <div className="flex items-start gap-4">
+                                                <div className="w-6 h-6 bg-brand/10 rounded-full flex items-center justify-center shrink-0 mt-0.5 border border-brand/20">
+                                                    <FaStore className="text-brand" size={10} />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Pickup Address</p>
+                                                    <p className="text-sm text-zinc-300 font-bold leading-relaxed">{order.pickup_address || 'Contact store for pickup details.'}</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+
+
+                                    </>
                                 ) : (
                                     <>
                                         <div className="pt-6 border-t border-white/5">
@@ -342,14 +355,7 @@ const OrderDetailClient = () => {
                                             </div>
                                         </div>
 
-                                        {order.delivery_instructions && (
-                                            <div className="pt-4 mt-4 border-t border-white/5">
-                                                <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-2">Instructions</p>
-                                                <p className="text-[11px] text-zinc-400 italic font-medium leading-relaxed bg-black/20 p-3 rounded-xl border border-white/5">
-                                                    "{order.delivery_instructions}"
-                                                </p>
-                                            </div>
-                                        )}
+
                                     </>
                                 )}
                             </div>

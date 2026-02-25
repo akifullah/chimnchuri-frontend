@@ -33,6 +33,25 @@
   }
 }
 
+@media (max-width: 768px) {
+  @keyframes image-wave {
+    0% {
+      transform: translateY(0);
+    }
+
+    20% {
+      transform: translateY(-20px);
+    }
+
+    40% {
+      transform: translateY(0);
+    }
+
+    80% {
+      transform: translateY(0);
+    }
+  }
+}
 
 
 /* @media (prefers-color-scheme: dark) {

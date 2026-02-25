@@ -12,11 +12,11 @@ const HeroSection = () => {
     return (
         <>
             <section>
-                <div className="bg-brand py-14 min-h-[30vh] lg:min-h-[60vh] flex items-center justify-center">
+                <div className="bg-brand py-14 min-h-[20vh] lg:min-h-[50vh] flex items-center justify-center">
                     <div className="flex justify-center">
                         {
                             images?.map((img, index) => (
-                                <img key={index} src={img?.src?.src} alt={img.alt} height={100} className="h-[12vw] animate-image-wave"
+                                <img key={index} src={img?.src?.src} alt={img.alt} height={100} className="h-[8vw] animate-image-wave"
                                     style={{ animationDelay: `${index * 0.12}s` }} />
                             ))
                         }

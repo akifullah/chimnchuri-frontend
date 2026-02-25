@@ -7,6 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 
 import { Luckiest_Guy } from 'next/font/google'
 import Header from "./_components/Header";
+import CartReminder from "./_components/CartReminder";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ['latin'],
@@ -60,6 +61,7 @@ export default async function RootLayout({ children }) {
               <Header />
 
               {children}
+              <CartReminder />
               <ToastContainer />
             </ReactQueryProvider>
           </SettingsProvider>

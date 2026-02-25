@@ -283,6 +283,15 @@ const ThankYouContent = () => {
                             </div>
                         </div>
 
+                        {order?.order_instruction && (
+                            <div className="pt-4 mt-2 border-t border-white/5">
+                                <p className="text-sm font-bold uppercase tracking-widest mb-1">Order Instructions</p>
+                                <p className="text-sm text-zinc-400 font-medium leading-relaxed bg-black/20 p-3 rounded-xl border border-white/5">
+                                    "{order.order_instruction}"
+                                </p>
+                            </div>
+                        )}
+
                     </div>
 
                     {/* Right Column (Sidebar) */}
@@ -363,29 +372,36 @@ const ThankYouContent = () => {
                                 </div>
 
                                 {isDelivery ? (
-                                    <div className="pt-6 border-t border-white/5 relative">
-                                        <div className="flex items-start gap-3">
-                                            <div className="w-5 h-5 bg-brand/10 rounded-full flex items-center justify-center shrink-0 mt-0.5 border border-brand/20">
-                                                <FaMapMarkerAlt className="text-brand" size={10} />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-[10px] font-bold uppercase tracking-widest text-brand">Shipping Address</p>
-                                                <p className="text-sm text-zinc-300 leading-relaxed font-medium">{delivery_address}, {city}, {postal_code}</p>
+                                    <>
+                                        <div className="pt-6 border-t border-white/5 relative">
+                                            <div className="flex items-start gap-3">
+                                                <div className="w-5 h-5 bg-brand/10 rounded-full flex items-center justify-center shrink-0 mt-0.5 border border-brand/20">
+                                                    <FaMapMarkerAlt className="text-brand" size={10} />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-brand">Shipping Address</p>
+                                                    <p className="text-sm text-zinc-300 leading-relaxed font-medium">{delivery_address}, {city}, {postal_code}</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+
+
+                                    </>
                                 ) : (
-                                    <div className="pt-6 border-t border-white/5 relative">
-                                        <div className="flex items-start gap-3">
-                                            <div className="w-5 h-5 bg-brand/10 rounded-full flex items-center justify-center shrink-0 mt-0.5 border border-brand/20">
-                                                <FaStore className="text-brand" size={10} />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-[12px] font-bold uppercase tracking-widest text-zinc-400">Pickup Address</p>
-                                                <p className="text-sm text-zinc-300 leading-relaxed font-medium">{order?.pickup_address || 'Contact store for pickup details.'}</p>
+                                    <>
+                                        <div className="pt-6 border-t border-white/5 relative">
+                                            <div className="flex items-start gap-3">
+                                                <div className="w-5 h-5 bg-brand/10 rounded-full flex items-center justify-center shrink-0 mt-0.5 border border-brand/20">
+                                                    <FaStore className="text-brand" size={10} />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-[12px] font-bold uppercase tracking-widest text-zinc-400">Pickup Address</p>
+                                                    <p className="text-sm text-zinc-300 leading-relaxed font-medium">{order?.pickup_address || 'Contact store for pickup details.'}</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+
+                                    </>
                                 )}
                             </div>
                         </div>
