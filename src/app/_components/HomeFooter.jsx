@@ -9,7 +9,7 @@ const HomeFooter = () => {
     const socialLinks = settings?.social_links ? JSON.parse(settings?.social_links) : null;
     return (
         <>
-            <section className="py-10 px-2 lg:py-20 bg-brand">
+            <section className="py-10 px-3 lg:py-20 bg-brand">
                 <div className="max-w-auto mx-auto text-center  font-bold uppercase">
                     {/* <img src={settings?.restaurant_logo ? process.env.NEXT_PUBLIC_BASE_URL + "/" + settings?.restaurant_logo : "/logo.png"} className='h-[100px] mx-auto' alt="" /> */}
                     <img src={process.env.NEXT_PUBLIC_BASE_URL && settings?.restaurant_logo ? `${process.env.NEXT_PUBLIC_BASE_URL}/${settings.restaurant_logo}` : "/logo-light.png"} className='h-[140px] mx-auto' onError={(e) => e.target.src = "/logo-light.png"} alt="Chim 'N' Churri " />
