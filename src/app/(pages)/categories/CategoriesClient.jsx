@@ -14,9 +14,9 @@ const CategoriesClient = () => {
 
     if (error) return <div>Error loading categories</div>;
     return (
-        <div className='container mx-auto my-14 px-2'>
+        <div className='container mx-auto my-8 sm:my-14 px-2'>
 
-            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4'>
+            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1.5 sm:gap-2 md:gap-4'>
                 {data?.data?.map((category, idx) => {
 
                     return (

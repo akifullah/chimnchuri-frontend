@@ -19,14 +19,14 @@ const CategoryClient = () => {
     return (
         <div>
             <ItemModal />
-            <div className="container mx-auto px-2 md:px-4 my-10 mb-20">
+            <div className="container mx-auto px-2 md:px-4 my-6 sm:my-10 mb-14 sm:mb-20">
 
-                <div className="my-4">
-                    <h3 className='text-2xl md:text-3xl font-bold'>{data?.data?.name}</h3>
+                <div className="my-3 sm:my-4">
+                    <h3 className='text-lg sm:text-2xl md:text-3xl font-bold'>{data?.data?.name}</h3>
                 </div>
 
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 md:gap-4">
 
                     {
                         items?.map((item, idx) => {
