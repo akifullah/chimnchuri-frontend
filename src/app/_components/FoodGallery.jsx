@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React from "react";
+import { motion } from "framer-motion";
 
 const images = [
     "/gallery/1.jpeg",
@@ -8,99 +9,41 @@ const images = [
     "/gallery/4.jpeg",
 ];
 
+// Duplicate images twice for a seamless infinite loop
+const marqueeImages = [...images, ...images];
+
 const FoodGallery = () => {
-    const [current, setCurrent] = useState(0);
-    const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-
-    const next = useCallback(() => {
-        setCurrent((prev) => (prev + 1) % images.length);
-    }, []);
-
-    const prev = useCallback(() => {
-        setCurrent((prev) => (prev - 1 + images.length) % images.length);
-    }, []);
-
-    useEffect(() => {
-        if (!isAutoPlaying) return;
-        const timer = setInterval(next, 3500);
-        return () => clearInterval(timer);
-    }, [isAutoPlaying, next]);
-
     return (
-        <section className="w-full py-12 lg:py-20 bg-[#0a0a0a]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
-                {/* Section Header */}
-                {/* <div className="text-center mb-10">
-                    <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight mb-3">
-                        Our Dishes
-                    </h2>
-                    <p className="text-zinc-500 text-sm max-w-md mx-auto">
-                        Fresh steaks, chimichurri sauces, and loaded fries — made with love.
-                    </p>
-                </div> */}
-
-                {/* Desktop: 4 columns grid */}
-                <div className="hidden md:grid grid-cols-4 gap-4">
-                    {images.map((src, i) => (
+        <section className="w-full py-12 lg:py-20 bg-[#0a0a0a] overflow-hidden">
+            <div className="w-full">
+                <motion.div
+                    className="flex gap-2 md:gap-4"
+                    animate={{
+                        x: ["0%", "-50%"],
+                    }}
+                    transition={{
+                        x: {
+                            duration: 20,
+                            repeat: Infinity,
+                            ease: "linear",
+                        },
+                    }}
+                    style={{ width: "max-content" }}
+                >
+                    {marqueeImages.map((src, i) => (
                         <div
                             key={i}
-                            className="group relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer"
+                            className="group relative flex-shrink-0 w-[150px] sm:w-[150px] md:w-[200px] lg:w-[250px] aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer"
                         >
                             <img
                                 src={src}
-                                alt={`Dish ${i + 1}`}
+                                alt={`Dish ${(i % images.length) + 1}`}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         </div>
                     ))}
-                </div>
-
-                {/* Mobile: Slider */}
-                <div
-                    className="md:hidden relative"
-                    onTouchStart={() => setIsAutoPlaying(false)}
-                    onTouchEnd={() => setIsAutoPlaying(true)}
-                >
-                    <div className="overflow-hidden rounded-2xl">
-                        <div
-                            className="flex transition-transform duration-500 ease-out"
-                            style={{ transform: `translateX(-${current * 100}%)` }}
-                        >
-                            {images.map((src, i) => (
-                                <div
-                                    key={i}
-                                    className="w-full flex-shrink-0 aspect-[3/4]"
-                                >
-                                    <img
-                                        src={src}
-                                        alt={`Dish ${i + 1}`}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Nav arrows */}
-                    <button
-                        onClick={prev}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
-                    >
-                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <button
-                        onClick={next}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
-                    >
-                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-
-                </div>
+                </motion.div>
             </div>
         </section>
     );

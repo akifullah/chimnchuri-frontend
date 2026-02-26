@@ -384,6 +384,19 @@ export default function MenuSection() {
           z-index: 5;
         }
 
+        .is-open .slice-1 .card-label{
+        transform: translateY(10px);
+        }
+        .is-open .slice-3 .card-label{
+        transform: translateY(-10px);
+        }
+        .is-open .slice-2 .card-label{
+        font-size: 4rem;
+        color: #396430; 
+        }
+
+
+
         .slice-1 .slice-card { top: 0; }
         .slice-2 .slice-card { top: 33.33%; }
         .slice-3 .slice-card { top: 66.66%; }
@@ -488,10 +501,20 @@ export default function MenuSection() {
             height: auto;
             aspect-ratio: 440 / 420;
           }
+          .is-open .slice-1 .card-label{
+          transform: translateY(10px);
+          }
+          .is-open .slice-3 .card-label{
+          transform: translateY(-10px);
+          }
           .card-label { 
             font-size: 2.5rem; 
             letter-spacing: 5px; 
-          }
+            }
+            .is-open .slice-2 .card-label{
+            font-size: 3rem;
+            color: #396430; 
+            }
           .is-open .slice-1 { transform: translateY(-15px) scale(1.02); }
           .is-open .slice-3 { transform: translateY(15px) scale(1.02); }
         }
@@ -505,7 +528,7 @@ export default function MenuSection() {
             width: 92vw;
           }
           .card-label { 
-            font-size: 2rem; 
+            font-size: 2.2rem; 
             letter-spacing: 4px; 
           }
         }
@@ -551,7 +574,7 @@ export default function MenuSection() {
               <div className="slice-card">
                 <Link
                   href={slice.href}
-                  className="card-label"
+                  className="card-label text-brand"
                   onClick={(e) => {
                     // If steak isn't open, prevent the link click
                     if (!isOpen) {
