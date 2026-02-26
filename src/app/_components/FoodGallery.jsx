@@ -14,7 +14,7 @@ const marqueeImages = [...images, ...images];
 
 const FoodGallery = () => {
     return (
-        <section className="w-full py-12 lg:py-20 bg-[#0a0a0a] overflow-hidden">
+        <section className="w-full overflow-hidden">
             <div className="w-full">
                 <motion.div
                     className="flex"
