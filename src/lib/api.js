@@ -136,4 +136,6 @@ export const sendContactEmailApi = (data) => apiClient("/contact", {
 // TEAM
 export const fetchTeamApi = () => apiClient("/teams");
 
+// DELIVERY ZONES
+export const fetchDeliveryZones = () => apiClient("/delivery-zones");
 

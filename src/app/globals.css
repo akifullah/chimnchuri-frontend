@@ -60,6 +60,9 @@
     --foreground: #ededed;
   }
 } */
+* {
+  letter-spacing: 1px;
+}
 
 body {
   background: var(--foreground);

@@ -7,7 +7,7 @@ import CheckoutForm from "./CheckoutForm";
 import { useDispatch, useSelector } from "react-redux";
 import Img from "@/app/_components/Img";
 import { useForm } from "react-hook-form";
-import { FaMapMarkerAlt, FaCreditCard, FaMoneyBillWave, FaShoppingBag, FaShieldAlt, FaArrowRight, FaPlus, FaMinus, FaTruck, FaStore } from "react-icons/fa";
+import { FaMapMarkerAlt, FaCreditCard, FaMoneyBillWave, FaShoppingBag, FaShieldAlt, FaArrowRight, FaPlus, FaMinus, FaTruck, FaStore, FaSearch, FaCheckCircle, FaTimesCircle, FaSpinner } from "react-icons/fa";
 import { createOrder } from "@/lib/api";
 import { clearCart } from "@/store/features/cartSlice";
 import { useCurrency, useSettings } from "@/app/providers/SettingsProvider";
@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import useCartCalculation from "@/hooks/useCartCalculation";
 import { useRouter } from "next/navigation";
 import useTimeSlots from "@/hooks/useTimeSlots";
+import useDeliveryZone from "@/hooks/useDeliveryZone";
 
 
 export default function CheckoutPage() {
@@ -23,15 +24,46 @@ export default function CheckoutPage() {
     const { data: timeSlots, isLoading: timeSlotsLoading, error: timeSlotsError } = useTimeSlots(orderType);
     const auth = useSelector((state) => state.authSlice);
 
-    const { deliveryFee,
+    // Delivery zone hook
+    const {
+        searchAddress,
+        selectAddress,
+        deliveryZone,
+        distance: deliveryDistance,
+        deliveryFee: zonalDeliveryFee,
+        minOrderAmount: zonalMinOrder,
+        isOutOfRange,
+        isSearching: isSearchingPostcodes,
+        isChecking: isCheckingDelivery,
+        error: deliveryError,
+        customerAddress,
+        zones,
+        searchResults,
+        showDropdown,
+        setShowDropdown,
+        reset: resetDeliveryZone,
+    } = useDeliveryZone();
+
+    const {
+        deliveryFee: settingsDeliveryFee,
         tax,
         taxAmount,
-        minOrderAmount,
+        minOrderAmount: settingsMinOrder,
         isCodEnabled,
         isOnlineEnabled,
         totalPrice,
         discountAmount: discount,
-        grandTotal } = useCartCalculation();
+        grandTotal: baseGrandTotal } = useCartCalculation();
+
+    // Use zone-based delivery fee when available, otherwise fallback to settings
+    const deliveryFee = orderType === 'delivery' && deliveryZone ? zonalDeliveryFee : settingsDeliveryFee;
+    const minOrderAmount = orderType === 'delivery' && deliveryZone ? zonalMinOrder : settingsMinOrder;
+    // Recalculate grand total with zone-based delivery fee
+    const grandTotal = totalPrice + (orderType === 'collection' ? 0 : deliveryFee) + taxAmount - discount;
+
+    // Postcode lookup state
+    const [postcodeInput, setPostcodeInput] = useState("");
+    const [deliveryChecked, setDeliveryChecked] = useState(false);
 
     const settings = useSettings();
 
@@ -43,13 +75,18 @@ export default function CheckoutPage() {
 
 
     const { items } = useSelector((state) => state.cartSlice);
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { register, handleSubmit, formState: { errors }, setValue } = useForm();
     const [paymentMethod, setPaymentMethod] = useState("cod");
     const checkoutFormRef = useRef(null);
 
-    // Reset allocations when order type changes
+    // Reset allocations and delivery zone when order type changes
     useEffect(() => {
         setAllocations({});
+        if (orderType === 'collection') {
+            resetDeliveryZone();
+            setDeliveryChecked(false);
+            setPostcodeInput("");
+        }
     }, [orderType]);
     useEffect(() => {
         if (settings) {
@@ -81,10 +118,46 @@ export default function CheckoutPage() {
 
     const router = useRouter()
     const [loading, setLoading] = useState(false);
+
+    // Step 1: Search postcodes — shows dropdown
+    const handlePostcodeLookup = async () => {
+        if (!postcodeInput.trim()) {
+            toast.error("Please enter a postcode");
+            return;
+        }
+        setDeliveryChecked(false);
+        await searchAddress(postcodeInput);
+    };
+
+    // Step 2: User selects a postcode from dropdown — check zone
+    const handleSelectPostcode = async (postcodeObj) => {
+        setPostcodeInput(postcodeObj.postcode);
+        const result = await selectAddress(postcodeObj);
+        if (result) {
+            setDeliveryChecked(true);
+            // Auto-fill city and postal code from geocoded data
+            if (result.customerAddress) {
+                setValue("postal_code", result.customerAddress.postcode || postcodeObj.postcode);
+                setValue("city", result.customerAddress.district || result.customerAddress.ward || "");
+            }
+        }
+    };
+
     const handlePlaceOrder = async (data) => {
 
-        if (grandTotal < minOrderAmount) {
-            toast.error(`minimum order amount is ${symbol}${minOrderAmount}`)
+        // Check delivery zone for delivery orders
+        if (orderType === 'delivery' && !deliveryChecked) {
+            toast.error("Please verify your delivery postcode first");
+            return;
+        }
+        if (orderType === 'delivery' && isOutOfRange) {
+            toast.error("Sorry, we cannot deliver to your area");
+            return;
+        }
+
+        const effectiveMinOrder = orderType === 'delivery' && deliveryZone ? deliveryZone.minimum_order_amount : minOrderAmount;
+        if (totalPrice < effectiveMinOrder) {
+            toast.error(`Minimum order amount is ${symbol}${effectiveMinOrder.toFixed(2)}`);
             return;
         }
         if (allocatedTotal !== totalCartQty) {
@@ -108,7 +181,7 @@ export default function CheckoutPage() {
 
 
         const user_id = auth?.user?.id || null;
-        const effectiveDeliveryFee = orderType === "collection" ? 0 : deliveryFee;
+        const effectiveDeliveryFee = orderType === "collection" ? 0 : (deliveryZone ? deliveryZone.delivery_fee : deliveryFee);
         const effectiveGrandTotal = totalPrice + effectiveDeliveryFee + taxAmount - discount;
         const formData = {
             ...data,
@@ -153,17 +226,17 @@ export default function CheckoutPage() {
     };
 
     const InputField = ({ label, name, type = "text", placeholder, options = {} }) => (
-        <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">{label}</label>
+        <div className="space-y-1">
+            <label className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">{label}</label>
             <input
                 type={type}
                 {...register(name, options)}
                 placeholder={placeholder}
-                className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/10 rounded-xl text-white placeholder-zinc-400 text-sm
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 bg-white/[0.05] border border-white/10 rounded-lg sm:rounded-xl text-white placeholder-zinc-400 text-xs sm:text-sm
                     focus:outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 focus:bg-white/[0.08]
                     transition-all duration-300 hover:border-white/20"
             />
-            {errors[name] && <p className="text-xs text-red-400 mt-1">{errors[name].message}</p>}
+            {errors[name] && <p className="text-[10px] sm:text-xs text-red-400 mt-1">{errors[name].message}</p>}
         </div>
     );
 
@@ -173,7 +246,7 @@ export default function CheckoutPage() {
 
 
     return (
-        <div className="min-h-screen bg-[#141414] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden text-white">
+        <div className="min-h-screen bg-[#141414] py-6 sm:py-12 px-3 sm:px-6 lg:px-8 relative overflow-hidden text-white">
 
             {loading && <Loader />}
 
@@ -184,44 +257,44 @@ export default function CheckoutPage() {
             </div>
 
             <div className="max-w-7xl mx-auto relative z-10">
-                <header className="mb-10">
-                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">Checkout</h1>
-                    <p className="text-zinc-300 text-sm">Complete your order with secure {orderType} and payment</p>
+                <header className="mb-6 sm:mb-10">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mb-1 sm:mb-2">Checkout</h1>
+                    <p className="text-zinc-300 text-xs sm:text-sm">Complete your order with secure {orderType} and payment</p>
                 </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start">
                     {/* Left Column: Forms */}
-                    <div className="lg:col-span-8 space-y-8">
+                    <div className="lg:col-span-8 space-y-5 sm:space-y-8">
 
                         {/* 0. Order Type: Delivery / Collection */}
-                        <section className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-4 sm:p-5 shadow-2xl">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-                                    <FaShoppingBag className="text-brand" size={14} />
+                        <section className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xl">
+                            <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-4">
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white flex items-center justify-center">
+                                    <FaShoppingBag className="text-brand" size={12} />
                                 </div>
-                                <h2 className="text-base font-bold">Order Type</h2>
+                                <h2 className="text-sm sm:text-base font-bold">Order Type</h2>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3">
                                 <button
                                     onClick={() => setOrderType('delivery')}
                                     type="button"
-                                    className={`relative group flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-300 cursor-pointer
+                                    className={`relative group flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg sm:rounded-xl border-2 transition-all duration-300 cursor-pointer
                                         ${orderType === 'delivery'
                                             ? 'border-brand bg-brand/10'
                                             : 'border-white/10 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]'}`}
                                 >
-                                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all ${orderType === 'delivery' ? 'bg-brand text-white shadow-md shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
-                                        <FaTruck size={14} />
+                                    <div className={`w-7 h-7 sm:w-9 sm:h-9 rounded-md sm:rounded-lg flex items-center justify-center shrink-0 transition-all ${orderType === 'delivery' ? 'bg-brand text-white shadow-md shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
+                                        <FaTruck size={12} />
                                     </div>
                                     <div className="text-left">
-                                        <div className="font-bold text-xs">Delivery</div>
-                                        <p className="text-[10px] text-zinc-400">To your door</p>
+                                        <div className="font-bold text-[10px] sm:text-xs">Delivery</div>
+                                        <p className="text-[9px] sm:text-[10px] text-zinc-400">To your door</p>
                                     </div>
                                     {orderType === 'delivery' && (
-                                        <div className="absolute top-2 right-2">
-                                            <div className="w-4 h-4 rounded-full bg-brand flex items-center justify-center text-white">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                        <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2">
+                                            <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-brand flex items-center justify-center text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
                                             </div>
                                         </div>
                                     )}
@@ -230,22 +303,22 @@ export default function CheckoutPage() {
                                 <button
                                     onClick={() => setOrderType('collection')}
                                     type="button"
-                                    className={`relative group flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-300 cursor-pointer
+                                    className={`relative group flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg sm:rounded-xl border-2 transition-all duration-300 cursor-pointer
                                         ${orderType === 'collection'
                                             ? 'border-brand bg-brand/10'
                                             : 'border-white/10 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]'}`}
                                 >
-                                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all ${orderType === 'collection' ? 'bg-brand text-white shadow-md shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
-                                        <FaStore size={14} />
+                                    <div className={`w-7 h-7 sm:w-9 sm:h-9 rounded-md sm:rounded-lg flex items-center justify-center shrink-0 transition-all ${orderType === 'collection' ? 'bg-brand text-white shadow-md shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
+                                        <FaStore size={12} />
                                     </div>
                                     <div className="text-left">
-                                        <div className="font-bold text-xs">Collection</div>
-                                        <p className="text-[10px] text-zinc-400">Pick up in store</p>
+                                        <div className="font-bold text-[10px] sm:text-xs">Collection</div>
+                                        <p className="text-[9px] sm:text-[10px] text-zinc-400">Pick up in store</p>
                                     </div>
                                     {orderType === 'collection' && (
-                                        <div className="absolute top-2 right-2">
-                                            <div className="w-4 h-4 rounded-full bg-brand flex items-center justify-center text-white">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                        <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2">
+                                            <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-brand flex items-center justify-center text-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
                                             </div>
                                         </div>
                                     )}
@@ -253,21 +326,183 @@ export default function CheckoutPage() {
                             </div>
                             {
                                 orderType === 'collection' && (
-                                    <p className="text-xs text-zinc-400 mt-5">You can collect your order from our store at <span className="text-white">{settings?.address}, {settings?.postcode}, {settings?.city}</span> </p>
+                                    <p className="text-[10px] sm:text-xs text-zinc-400 mt-3 sm:mt-5">You can collect your order from our store at <span className="text-white">{settings?.address}, {settings?.postcode}, {settings?.city}</span> </p>
                                 )
                             }
                         </section>
 
-                        {/* 1. Customer Details & Address */}
-                        <section className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center">
-                                    <FaMapMarkerAlt className="text-brand" size={18} />
+                        {/* 1a. Delivery Postcode Lookup (only for delivery) */}
+                        {orderType === 'delivery' && (
+                            <section className="bg-white/[0.04] relative z-10 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl">
+                                <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-brand to-green-600 flex items-center justify-center shadow-lg shadow-brand/20">
+                                        <FaTruck className="text-white" size={14} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-sm sm:text-lg font-bold">Delivery Area Check</h2>
+                                        <p className="text-[10px] sm:text-xs text-zinc-400 mt-0.5">Enter your postcode to check if we deliver to your area</p>
+                                    </div>
                                 </div>
-                                <h2 className="text-xl font-bold">{orderType === 'delivery' ? 'Delivery Details' : 'Collection Details'}</h2>
+
+                                {/* Postcode Input */}
+                                <div className="relative mb-3 sm:mb-4">
+                                    <div className="flex gap-2 sm:gap-3">
+                                        <div className="relative flex-1">
+                                            <input
+                                                type="text"
+                                                value={postcodeInput}
+                                                onChange={(e) => {
+                                                    setPostcodeInput(e.target.value.toUpperCase());
+                                                    if (deliveryChecked) {
+                                                        setDeliveryChecked(false);
+                                                        resetDeliveryZone();
+                                                    }
+                                                    if (showDropdown) {
+                                                        setShowDropdown(false);
+                                                    }
+                                                }}
+                                                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handlePostcodeLookup())}
+                                                placeholder="Enter postcode (e.g. M43 6JH)"
+                                                className="w-full pl-3 sm:pl-4 pr-10 sm:pr-12 py-3 sm:py-3.5 bg-white/[0.05] border border-white/10 rounded-lg sm:rounded-xl text-white placeholder-zinc-500 text-xs sm:text-sm tracking-wider font-medium
+                                                    focus:outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 focus:bg-white/[0.08]
+                                                    transition-all duration-300 hover:border-white/20 uppercase"
+                                            />
+                                            <FaMapMarkerAlt className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-zinc-500" size={12} />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handlePostcodeLookup}
+                                            disabled={isSearchingPostcodes || isCheckingDelivery || !postcodeInput.trim()}
+                                            className="px-4 sm:px-6 py-3 sm:py-3.5 bg-brand hover:bg-green-700 disabled:bg-zinc-700 disabled:text-zinc-500 text-white font-bold text-xs sm:text-sm rounded-lg sm:rounded-xl
+                                                transition-all duration-300 flex items-center gap-1.5 sm:gap-2 shrink-0 cursor-pointer disabled:cursor-not-allowed
+                                                shadow-lg shadow-brand/20 hover:shadow-brand/30"
+                                        >
+                                            {isSearchingPostcodes ? (
+                                                <><FaSpinner className="animate-spin" size={12} /> Searching...</>
+                                            ) : (
+                                                <><FaSearch size={12} /> Search</>
+                                            )}
+                                        </button>
+                                    </div>
+
+                                    {/* Postcode Search Results Dropdown */}
+                                    {showDropdown && searchResults.length > 0 && (
+                                        <div className="absolute z-100 left-0 right-0 mt-1.5 bg-zinc-900 border border-white/10 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[240px] sm:max-h-[280px] overflow-y-auto custom-scrollbar">
+                                            <div className="p-1.5 sm:p-2">
+                                                <p className="text-[9px] sm:text-[10px] text-zinc-500 uppercase tracking-widest font-bold px-2 sm:px-3 py-1.5 sm:py-2">Select your postcode</p>
+                                                {searchResults.map((result, idx) => (
+                                                    <button
+                                                        key={idx}
+                                                        type="button"
+                                                        onClick={() => handleSelectPostcode(result)}
+                                                        className="w-full flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-left hover:bg-white/[0.06] transition-all duration-200 group cursor-pointer"
+                                                    >
+                                                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-brand/10 flex items-center justify-center shrink-0 group-hover:bg-brand/20 transition-colors">
+                                                            <FaMapMarkerAlt className="text-brand" size={10} />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-xs sm:text-sm font-bold text-white tracking-wide">{result.postcode}</p>
+                                                            <p className="text-[10px] sm:text-[11px] text-zinc-400 truncate">{result.district}{result.ward ? `, ${result.ward}` : ''}</p>
+                                                        </div>
+                                                        <FaArrowRight className="text-zinc-600 group-hover:text-brand transition-colors shrink-0" size={8} />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Checking zone spinner */}
+                                {isCheckingDelivery && (
+                                    <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-white/[0.03] border border-white/5">
+                                        <FaSpinner className="animate-spin text-brand" size={14} />
+                                        <span className="text-xs sm:text-sm text-zinc-400">Checking delivery availability...</span>
+                                    </div>
+                                )}
+
+                                {/* Delivery Zone Result */}
+                                {deliveryChecked && deliveryZone && !isOutOfRange && (
+                                    <div className="bg-green-500/10 border border-green-500/20 rounded-xl sm:rounded-2xl p-3 sm:p-4">
+                                        <div className="flex items-start gap-2.5 sm:gap-3">
+                                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-green-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                                                <FaCheckCircle className="text-green-400" size={14} />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="text-green-400 font-bold text-xs sm:text-sm mb-0.5 sm:mb-1">Great news! We deliver to your area</h3>
+                                                <div className="space-y-0.5">
+                                                    {customerAddress && (
+                                                        <p className="text-[10px] sm:text-xs text-zinc-400">📍 {customerAddress.postcode}{customerAddress.district ? `, ${customerAddress.district}` : ''}</p>
+                                                    )}
+                                                    {/* <p className="text-[10px] sm:text-xs text-zinc-400">📏 Distance: <span className="text-white font-semibold">{deliveryDistance} miles</span> from our store</p> */}
+                                                    <p className="text-[10px] sm:text-xs text-zinc-400">🚚 Delivery Fee: <span className="text-white font-semibold">{symbol}{deliveryZone.delivery_fee.toFixed(2)}</span></p>
+                                                    <p className="text-[10px] sm:text-xs text-zinc-400">🛒 Min. Order: <span className="text-white font-semibold">{symbol}{deliveryZone.minimum_order_amount.toFixed(2)}</span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Out of Range */}
+                                {deliveryChecked && isOutOfRange && (
+                                    <div className="bg-red-500/10 border border-red-500/20 rounded-xl sm:rounded-2xl p-3 sm:p-4">
+                                        <div className="flex items-start gap-2.5 sm:gap-3">
+                                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-red-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                                                <FaTimesCircle className="text-red-400" size={14} />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="text-red-400 font-bold text-xs sm:text-sm mb-0.5 sm:mb-1">Sorry, we can't deliver to this area</h3>
+                                                <div className="space-y-0.5">
+                                                    {customerAddress && (
+                                                        <p className="text-[10px] sm:text-xs text-zinc-400">📍 {customerAddress.postcode}{customerAddress.district ? `, ${customerAddress.district}` : ''}</p>
+                                                    )}
+                                                    <p className="text-[10px] sm:text-xs text-zinc-400">📏 Distance: <span className="text-white font-semibold">{deliveryDistance} miles</span> — beyond our delivery range</p>
+                                                    <p className="text-[10px] sm:text-xs text-zinc-300 mt-1.5">You can still place a <button type="button" onClick={() => setOrderType('collection')} className="text-brand font-bold underline underline-offset-2 hover:text-green-400 transition-colors cursor-pointer">Collection Order</button> and pick it up from our store.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Error */}
+                                {deliveryError && (
+                                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3 sm:p-4">
+                                        <p className="text-yellow-400 text-xs sm:text-sm font-medium">⚠️ {deliveryError}</p>
+                                    </div>
+                                )}
+
+                                {/* Delivery zones info */}
+                                {!deliveryChecked && !isCheckingDelivery && !showDropdown && zones.length > 0 && (
+                                    <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-3 sm:mt-4">
+                                        {zones.sort((a, b) => a.max_distance - b.max_distance).map((zone, idx) => {
+                                            const colors = ['bg-green-400', 'bg-yellow-400', 'bg-orange-400', 'bg-red-400'];
+                                            return (
+                                                <div key={zone.id} className="bg-white/[0.03] border border-white/5 rounded-lg sm:rounded-xl p-2.5 sm:p-3">
+                                                    <div className="flex items-center gap-1.5 mb-1 sm:mb-1.5">
+                                                        <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${colors[idx] || colors[0]}`}></div>
+                                                        <span className="text-[10px] sm:text-xs font-bold text-zinc-300">{zone.name}</span>
+                                                    </div>
+                                                    <p className="text-[9px] sm:text-[11px] text-zinc-400">
+                                                        {zone.min_distance > 0 ? `${zone.min_distance} – ` : 'Within '}{zone.max_distance} mi — {symbol}{zone.delivery_fee.toFixed(2)}
+                                                    </p>
+                                                    <p className="text-[8px] sm:text-[10px] text-zinc-500 mt-0.5">Min. {symbol}{zone.minimum_order_amount.toFixed(2)}</p>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </section>
+                        )}
+
+                        {/* 1b. Customer Details & Address */}
+                        <section className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl">
+                            <div className="flex items-center gap-2.5 sm:gap-4 mb-5 sm:mb-8">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white flex items-center justify-center">
+                                    <FaMapMarkerAlt className="text-brand" size={14} />
+                                </div>
+                                <h2 className="text-sm sm:text-xl font-bold">{orderType === 'delivery' ? 'Delivery Details' : 'Collection Details'}</h2>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                 <InputField label="Full name" name="full_name" placeholder="John Doe" options={{ required: "Name is required" }} />
                                 <InputField label="Email" name="email" placeholder="Email Address" options={{ required: "Email is required" }} />
                                 <InputField label="Phone Number" name="phone" placeholder="+44 7700 900000" options={{ required: "Phone is required" }} />
@@ -281,44 +516,44 @@ export default function CheckoutPage() {
                                     </>
                                 )}
 
-                                <div className="md:col-span-2 space-y-4">
+                                <div className="md:col-span-2 space-y-3 sm:space-y-4">
                                     <div className="flex justify-between items-end">
-                                        <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Time Slot Allocation</label>
-                                        <div className={`text-xs font-bold px-3 py-1 rounded-full ${allocatedTotal === totalCartQty ? 'bg-brand/20 text-white' : 'bg-red-500/10 text-red-400'}`}>
+                                        <label className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Time Slot Allocation</label>
+                                        <div className={`text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full ${allocatedTotal === totalCartQty ? 'bg-brand/20 text-white' : 'bg-red-500/10 text-red-400'}`}>
                                             {allocatedTotal} / {totalCartQty} Allocated
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 gap-3">
+                                    <div className="grid grid-cols-1 gap-2 sm:gap-3">
                                         {timeSlotsLoading ? (
-                                            <div className="text-zinc-500 text-sm animate-pulse">Loading time slots...</div>
+                                            <div className="text-zinc-500 text-xs sm:text-sm animate-pulse">Loading time slots...</div>
                                         ) : timeSlots?.data?.map((slot) => {
                                             if (slot?.disabled) return;
                                             return (
-                                                <div key={slot.id} className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${slot.disabled ? 'opacity-50 grayscale' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}>
+                                                <div key={slot.id} className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl border transition-all ${slot.disabled ? 'opacity-50 grayscale' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}>
                                                     <div className="flex-1">
-                                                        <div className="text-sm font-bold text-white">{slot.start_time}</div>
-                                                        <div className="text-[10px] text-zinc-300 uppercase tracking-widest mt-0.5">Capacity: {slot.max_capacity}</div>
+                                                        <div className="text-xs sm:text-sm font-bold text-white">{slot.start_time}</div>
+                                                        <div className="text-[9px] sm:text-[10px] text-zinc-300 uppercase tracking-widest mt-0.5">Capacity: {slot.max_capacity}</div>
                                                     </div>
-                                                    <div className="flex items-center bg-white/[0.05] border border-white/10 rounded-xl overflow-hidden shadow-inner">
+                                                    <div className="flex items-center bg-white/[0.05] border border-white/10 rounded-lg sm:rounded-xl overflow-hidden shadow-inner">
                                                         <button
                                                             type="button"
                                                             onClick={() => handleAllocationChange(slot.id, (allocations[slot.id] || 0) - 1, slot.max_capacity)}
                                                             disabled={slot.disabled || (allocations[slot.id] || 0) <= 0}
-                                                            className="p-3 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                                                            className="p-2 sm:p-3 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
                                                         >
-                                                            <FaMinus size={10} />
+                                                            <FaMinus size={9} />
                                                         </button>
-                                                        <div className="w-10 text-center text-sm font-bold text-white tabular-nums">
+                                                        <div className="w-8 sm:w-10 text-center text-xs sm:text-sm font-bold text-white tabular-nums">
                                                             {allocations[slot.id] || 0}
                                                         </div>
                                                         <button
                                                             type="button"
                                                             onClick={() => handleAllocationChange(slot.id, (allocations[slot.id] || 0) + 1, slot.max_capacity)}
                                                             disabled={slot.disabled || (allocations[slot.id] || 0) >= slot.max_capacity || allocatedTotal >= totalCartQty}
-                                                            className="p-3 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                                                            className="p-2 sm:p-3 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
                                                         >
-                                                            <FaPlus size={10} />
+                                                            <FaPlus size={9} />
                                                         </button>
                                                     </div>
                                                 </div>
@@ -334,51 +569,50 @@ export default function CheckoutPage() {
                                     {allocatedTotal !== totalCartQty && <p className="text-[12px] text-red-400 font-medium">* Total items ({totalCartQty}) must be fully allocated.</p>}
                                 </div>
 
-                                <div className="md:col-span-2 space-y-1.5">
-                                    <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Order Instructions (Optional)</label>
+                                <div className="md:col-span-2 space-y-1">
+                                    <label className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400">Order Instructions (Optional)</label>
                                     <textarea
                                         {...register("order_instruction")}
                                         placeholder={orderType === 'collection' ? 'Any special requests for your order...' : 'Ring the doorbell, leave at gate, etc...'}
-                                        className="w-full px-4 py-3.5 bg-white/[0.05] border border-white/10 rounded-xl text-white placeholder-zinc-400 text-sm
+                                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3.5 bg-white/[0.05] border border-white/10 rounded-lg sm:rounded-xl text-white placeholder-zinc-400 text-xs sm:text-sm
                                             focus:outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 focus:bg-white/[0.08]
-                                            transition-all duration-300 hover:border-white/20 min-h-[100px] resize-none"
+                                            transition-all duration-300 hover:border-white/20 min-h-[80px] sm:min-h-[100px] resize-none"
                                     />
-                                    {/* Allergens Notice */}
-                                    <div className="bg-yellow-50/10 border border-yellow-500/20 rounded-xl p-4 mb-4">
-                                        <p className="text-xs text-yellow-400 font-bold uppercase tracking-wider mb-1">⚠️ Allergens Notice</p>
-                                        <p className="text-[11px] text-yellow-300/80 leading-relaxed">Our food may contain or come into contact with common allergens such as nuts, gluten, dairy, eggs, soy, and shellfish. Please inform us of any allergies before placing your order.</p>
+                                    <div className="bg-yellow-50/10 border border-yellow-500/20 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
+                                        <p className="text-[10px] sm:text-xs text-yellow-400 font-bold uppercase tracking-wider mb-0.5 sm:mb-1">⚠️ Allergens Notice</p>
+                                        <p className="text-[9px] sm:text-[11px] text-yellow-300/80 leading-relaxed">Our food may contain or come into contact with common allergens such as nuts, gluten, dairy, eggs, soy, and shellfish. Please inform us of any allergies before placing your order.</p>
                                     </div>
                                 </div>
                             </div>
                         </section>
 
                         {/* 2. Payment Method */}
-                        <section className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center">
-                                    <FaCreditCard className="text-brand" size={18} />
+                        <section className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl">
+                            <div className="flex items-center gap-2.5 sm:gap-4 mb-5 sm:mb-8">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white flex items-center justify-center">
+                                    <FaCreditCard className="text-brand" size={14} />
                                 </div>
-                                <h2 className="text-xl font-bold">Payment Method</h2>
+                                <h2 className="text-sm sm:text-xl font-bold">Payment Method</h2>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-8">
                                 {
                                     !!isCodEnabled && (
                                         <button
                                             onClick={() => setPaymentMethod('cod')}
                                             type="button"
-                                            className={`relative group flex flex-col items-start p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer text-left
+                                            className={`relative group flex flex-col items-start p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 cursor-pointer text-left
                                         ${paymentMethod === 'cod'
                                                     ? 'border-brand bg-brand/10'
                                                     : 'border-white/10 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]'}`}
                                         >
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${paymentMethod === 'cod' ? 'bg-brand text-white shadow-lg shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
-                                                    <FaMoneyBillWave size={18} />
+                                            <div className="flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3">
+                                                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-all ${paymentMethod === 'cod' ? 'bg-brand text-white shadow-lg shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
+                                                    <FaMoneyBillWave size={14} />
                                                 </div>
-                                                <div className="font-bold text-sm">{orderType === 'collection' ? 'Pay on Collection' : 'Cash on Delivery'}</div>
+                                                <div className="font-bold text-xs sm:text-sm">{orderType === 'collection' ? 'Pay on Collection' : 'Cash on Delivery'}</div>
                                             </div>
-                                            <p className="text-xs text-zinc-400 leading-relaxed">{orderType === 'collection' ? 'Pay when you collect your order from our store.' : 'Pay with cash when your delicious food arrives at your doorstep.'}</p>
+                                            <p className="text-[10px] sm:text-xs text-zinc-400 leading-relaxed">{orderType === 'collection' ? 'Pay when you collect your order from our store.' : 'Pay with cash when your delicious food arrives at your doorstep.'}</p>
                                             {paymentMethod === 'cod' && (
                                                 <div className="absolute top-4 right-4 text-brand">
                                                     <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center text-white">
@@ -395,18 +629,18 @@ export default function CheckoutPage() {
                                         <button
                                             onClick={() => setPaymentMethod('online')}
                                             type="button"
-                                            className={`relative group flex flex-col items-start p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer text-left
+                                            className={`relative group flex flex-col items-start p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 cursor-pointer text-left
                                         ${paymentMethod === 'online'
                                                     ? 'border-brand bg-brand/10'
                                                     : 'border-white/10 bg-white/[0.02] hover:border-white/30 hover:bg-white/[0.04]'}`}
                                         >
-                                            <div className="flex items-center gap-3 mb-3">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${paymentMethod === 'online' ? 'bg-brand text-white shadow-lg shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
-                                                    <FaCreditCard size={18} />
+                                            <div className="flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3">
+                                                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-all ${paymentMethod === 'online' ? 'bg-brand text-white shadow-lg shadow-brand/30' : 'bg-white/10 text-zinc-400'}`}>
+                                                    <FaCreditCard size={14} />
                                                 </div>
-                                                <div className="font-bold text-sm">Pay Online</div>
+                                                <div className="font-bold text-xs sm:text-sm">Pay Online</div>
                                             </div>
-                                            <p className="text-xs text-zinc-400 leading-relaxed">Fast and secure payment using your credit or debit card.</p>
+                                            <p className="text-[10px] sm:text-xs text-zinc-400 leading-relaxed">Fast and secure payment using your credit or debit card.</p>
                                             {paymentMethod === 'online' && (
                                                 <div className="absolute top-4 right-4 text-brand">
                                                     <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center text-white">
@@ -436,7 +670,7 @@ export default function CheckoutPage() {
                             {isCodEnabled || !!isOnlineEnabled ? (
                                 <button
                                     onClick={handleSubmit(handlePlaceOrder)}
-                                    disabled={allocatedTotal !== totalCartQty || loading}
+                                    disabled={allocatedTotal !== totalCartQty || loading || (orderType === 'delivery' && (!deliveryChecked || isOutOfRange))}
                                     className={`group w-full flex items-center justify-center gap-3 py-4.5 font-bold rounded-2xl transition-all duration-300 cursor-pointer
                                     ${allocatedTotal === totalCartQty
                                             ? 'hover:bg-brand bg-green-700 text-white'
@@ -463,35 +697,35 @@ export default function CheckoutPage() {
 
                     {/* Right Column: Order Summary */}
                     <aside className="lg:col-span-4 lg:sticky lg:top-8">
-                        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-3xl p-2 sm:p-3 shadow-2xl">
-                            <h2 className="text-xl font-bold mb-8 flex items-center gap-3">
-                                <FaShoppingBag className="text-white" size={18} />
+                        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-2 sm:p-3 shadow-2xl">
+                            <h2 className="text-base sm:text-xl font-bold mb-5 sm:mb-8 flex items-center gap-2 sm:gap-3">
+                                <FaShoppingBag className="text-white" size={14} />
                                 Order Summary
                             </h2>
 
-                            <div className="space-y-6 mb-8 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
+                            <div className="space-y-4 sm:space-y-6 mb-5 sm:mb-8 max-h-[350px] sm:max-h-[450px] overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
                                 {items.map((item, idx) => (
-                                    <div key={idx} className="flex gap-4 group">
-                                        <div className="w-16 h-16 rounded-xl bg-zinc-800 border border-white/5 overflow-hidden relative shrink-0">
+                                    <div key={idx} className="flex gap-3 sm:gap-4 group">
+                                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl bg-zinc-800 border border-white/5 overflow-hidden relative shrink-0">
                                             {item.image ? (
                                                 <Img src={item.image} alt={item.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-zinc-500">
-                                                    <FaShoppingBag size={24} />
+                                                    <FaShoppingBag size={18} />
                                                 </div>
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-start gap-2">
                                                 <div>
-                                                    <h3 className="font-bold text-white text-sm line-clamp-1 mb-0.5">{item.name}</h3>
-                                                    <p className="text-[12px] text-zinc-200 font-medium">{item.selectedSize.name}</p>
+                                                    <h3 className="font-bold text-white text-xs sm:text-sm line-clamp-1 mb-0.5">{item.name}</h3>
+                                                    <p className="text-[10px] sm:text-[12px] text-zinc-200 font-medium">{item.selectedSize.name}</p>
                                                 </div>
-                                                <p className="text-sm font-bold text-zinc-200">{symbol} {item.itemTotal.toFixed(2)}</p>
+                                                <p className="text-xs sm:text-sm font-bold text-zinc-200">{symbol} {item.itemTotal.toFixed(2)}</p>
                                             </div>
 
                                             {item.selectedAddons && item.selectedAddons.length > 0 && (
-                                                <div className="mt-3 text-[10px] space-y-0.5">
+                                                <div className="mt-2 sm:mt-3 text-[9px] sm:text-[10px] space-y-0.5">
                                                     {item.selectedAddons.map((addon, aIdx) => (
                                                         <div key={aIdx} className="flex justify-between text-zinc-300">
                                                             <span>+ {addon.name}</span>
@@ -501,56 +735,61 @@ export default function CheckoutPage() {
                                                 </div>
                                             )}
 
-                                            <div className="mt-2 text-[11px] font-bold text-zinc-300">Qty: {item.quantity}</div>
+                                            <div className="mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] font-bold text-zinc-300">Qty: {item.quantity}</div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="border-t border-white/5 pt-6 space-y-4">
-                                <div className="flex justify-between text-sm text-zinc-300">
+                            <div className="border-t border-white/5 pt-4 sm:pt-6 space-y-2.5 sm:space-y-4">
+                                <div className="flex justify-between text-xs sm:text-sm text-zinc-300">
                                     <span>Subtotal</span>
                                     <span className="text-zinc-200">{symbol} {totalPrice.toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between text-sm text-zinc-300">
-                                    <span>{orderType === 'collection' ? 'Delivery Fee' : 'Delivery Fee'}</span>
+                                <div className="flex justify-between text-xs sm:text-sm text-zinc-300">
+                                    <span>Delivery Fee</span>
                                     {orderType === 'collection' ? (
-                                        <span className="text-green-400 line-through opacity-60">{symbol} {deliveryFee.toFixed(2)}</span>
+                                        <span className="text-green-400 line-through opacity-60">{symbol} {settingsDeliveryFee.toFixed(2)}</span>
+                                    ) : deliveryChecked && deliveryZone ? (
+                                        <span className="text-zinc-200">{symbol} {deliveryZone.delivery_fee.toFixed(2)}</span>
+                                    ) : deliveryChecked && isOutOfRange ? (
+                                        <span className="text-red-400 text-[10px] sm:text-xs">Out of range</span>
                                     ) : (
-                                        <span className="text-zinc-200">{symbol} {deliveryFee.toFixed(2)}</span>
+                                        <span className="text-zinc-500 text-[10px] sm:text-xs italic">Enter postcode to check</span>
                                     )}
                                 </div>
-                                {/* {orderType === 'collection' && (
-                                    <div className="flex justify-between text-sm text-green-400">
-                                        <span>Collection Savings</span>
-                                        <span>- {symbol} {deliveryFee.toFixed(2)}</span>
-                                    </div>
-                                )} */}
 
-                                <div className="flex justify-between text-sm text-green-500">
+                                <div className="flex justify-between text-xs sm:text-sm text-green-500">
                                     <span>Discount</span>
                                     <span className="text-green-500">{symbol} {discount.toFixed(2)}</span>
                                 </div>
 
-                                <div className="flex justify-between text-sm text-zinc-300">
+                                <div className="flex justify-between text-xs sm:text-sm text-zinc-300">
                                     <span>Tax ({tax}%)</span>
                                     <span className="text-zinc-200">{symbol} {taxAmount.toFixed(2)}</span>
                                 </div>
 
-                                <div className="flex justify-between items-center pt-4 border-t border-white/10">
-                                    <span className="text-base font-bold text-white">Total</span>
-                                    <span className="text-2xl font-black text-white tracking-tight">{symbol} {(orderType === 'collection' ? grandTotal - deliveryFee : grandTotal).toFixed(2)}</span>
+                                <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-white/10">
+                                    <span className="text-sm sm:text-base font-bold text-white">Total</span>
+                                    <span className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                                        {orderType === 'collection'
+                                            ? `${symbol} ${(totalPrice + taxAmount - discount).toFixed(2)}`
+                                            : deliveryChecked && deliveryZone
+                                                ? `${symbol} ${grandTotal.toFixed(2)}`
+                                                : `${symbol} ${(totalPrice + taxAmount - discount).toFixed(2)}` + (orderType === 'delivery' ? ' + delivery' : '')
+                                        }
+                                    </span>
                                 </div>
                                 {totalPrice < minOrderAmount && (
-                                    <div className="mt-2 text-red-500 font-bold text-[12px] text-center">
-                                        Minimum order amount is {symbol} {minOrderAmount}
+                                    <div className="mt-1.5 sm:mt-2 text-red-500 font-bold text-[10px] sm:text-[12px] text-center">
+                                        Minimum order amount is {symbol} {minOrderAmount.toFixed(2)}
                                     </div>
                                 )}
 
                             </div>
 
-                            <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.02] border border-white/5 text-[10px] text-zinc-400 justify-center uppercase tracking-widest font-bold">
-                                <FaShieldAlt />
+                            <div className="mt-3 sm:mt-4 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl bg-white/[0.02] border border-white/5 text-[9px] sm:text-[10px] text-zinc-400 justify-center uppercase tracking-widest font-bold">
+                                <FaShieldAlt size={10} />
                                 <span>Encrypted & Secure</span>
                             </div>
                         </div>
