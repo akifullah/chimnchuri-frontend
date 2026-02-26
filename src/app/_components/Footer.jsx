@@ -15,7 +15,7 @@ const Footer = () => {
                         <h3 className='text-xl lg:text-2xl font-bold mb-2 md:mb-4'>Quick Links</h3>
                         <ul>
                             <li className=''>
-                                <Link className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-black transition ease duration-200 inline-block' href={"/categories"}>Our Menu</Link>
+                                <a className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-black transition ease duration-200 inline-block' href="https://www.chimnchurri.com/categories/1">Our Menu</a>
                             </li>
                             <li className=''>
                                 <Link className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-black transition ease duration-200 inline-block' href={"/contact"}>Contact Us</Link>

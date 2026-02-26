@@ -56,12 +56,12 @@ const Header = () => {
                     </a>
 
                     <ul className='hidden lg:flex lg:relative items-center gap-8 font-medium text-xl'>
-                        <li><Link href={"/categories"}>Our Menu</Link></li>
+                        <li><a href="https://www.chimnchurri.com/categories/1">Our Menu</a></li>
                         <li><Link href={"/about"}>About</Link></li>
                         <li><Link href={"/contact"}>Contact</Link></li>
-                        <li><Link href={"/categories"}
+                        <li><a href="https://www.chimnchurri.com/categories/1"
                             className='px-6 py-2 rounded-[5px] text-base font-semibold bg-white text-brand border-none hover:bg-white/90 transition-all duration-300 inline-flex items-center'
-                        >Order Online</Link></li>
+                        >Order Online</a></li>
                     </ul>
 
                     <div className="flex items-center text-xs md:text-[14px] gap-5 md:gap-6">
@@ -105,12 +105,12 @@ const Header = () => {
                 </button>
 
                 <ul className='grid text-black gap-2 pt-10 '>
-                    <li className='border-b transition duration-300 rounded-sm hover:bg-brand text-brand hover:text-white border-zinc-400/30'><Link onClick={toggleMobileNav} className='block px-2 py-2 ' href={"/categories"}>Our Menu</Link></li>
+                    <li className='border-b transition duration-300 rounded-sm hover:bg-brand text-brand hover:text-white border-zinc-400/30'><a onClick={toggleMobileNav} className='block px-2 py-2 ' href="https://www.chimnchurri.com/categories/1">Our Menu</a></li>
                     <li className='border-b transition duration-300 rounded-sm hover:bg-brand text-brand hover:text-white border-zinc-400/30'><Link onClick={toggleMobileNav} className='block px-2 py-2 ' href={"/about"}>About</Link></li>
                     <li className='border-b transition duration-300 rounded-sm hover:bg-brand text-brand hover:text-white border-zinc-400/30'><Link onClick={toggleMobileNav} className='block px-2 py-2 ' href={"/contact"}>Contact</Link></li>
-                    <li className='mt-4'><Link href={"/categories"}
+                    <li className='mt-4'><a href="https://www.chimnchurri.com/categories/1"
                         className=' py-2 w-full flex justify-center items-center text-white text-center bg-brand rounded-xl text-lg hover:bg-black hover:text-white transition-all duration-500'
-                    >Order Online</Link></li>
+                    >Order Online</a></li>
                 </ul>
             </div>
         </>
