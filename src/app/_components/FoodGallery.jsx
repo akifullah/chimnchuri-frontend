@@ -31,9 +31,9 @@ const FoodGallery = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
                 {/* Section Header */}
                 <div className="text-center mb-10">
-                    <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight mb-3">
+                    {/* <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight mb-3">
                         Our Dishes
-                    </h2>
+                    </h2> */}
                     <p className="text-zinc-500 text-sm max-w-md mx-auto">
                         Fresh steaks, chimichurri sauces, and loaded fries — made with love.
                     </p>

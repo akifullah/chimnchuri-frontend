@@ -361,9 +361,9 @@ export default function MenuSection() {
         .slice-2 { clip-path: inset(33.33% 0 33.33% 0); z-index: 2; }
         .slice-3 { clip-path: inset(66.66% 0 0 0); z-index: 1; }
 
-        .is-open .slice-1 { transform: translateY(-120px) scale(1.02); transition-delay: 0.5s; }
+        .is-open .slice-1 { transform: translateY(-35px) scale(1.02); transition-delay: 0.5s; }
         .is-open .slice-2 { transform: translateY(0px) scale(1.02); transition-delay: 0.6s; }
-        .is-open .slice-3 { transform: translateY(120px) scale(1.02); transition-delay: 0.7s; }
+        .is-open .slice-3 { transform: translateY(35px) scale(1.02); transition-delay: 0.7s; }
 
         .is-open .steak-vector { opacity: 0.3; transition-delay: 0.6s; }
 
@@ -401,7 +401,7 @@ export default function MenuSection() {
         .card-label {
           font-family: inherit;
           font-weight: 900;
-          font-size: 1.6rem;
+          font-size: 3rem;
           letter-spacing: 3px;
           color: var(--color-cream);
           transition: all 0.3s ease;
@@ -463,11 +463,11 @@ export default function MenuSection() {
             aspect-ratio: 440 / 420;
           }
           .card-label { 
-            font-size: 2.4rem; 
+            font-size: 3rem; 
             letter-spacing: 6px; 
           }
-          .is-open .slice-1 { transform: translateY(-80px) scale(1.02); }
-          .is-open .slice-3 { transform: translateY(80px) scale(1.02); }
+          .is-open .slice-1 { transform: translateY(-25px) scale(1.02); }
+          .is-open .slice-3 { transform: translateY(25px) scale(1.02); }
           .plate-glow {
             width: 80vw;
             height: 80vw;
@@ -489,11 +489,11 @@ export default function MenuSection() {
             aspect-ratio: 440 / 420;
           }
           .card-label { 
-            font-size: 2.2rem; 
+            font-size: 2.5rem; 
             letter-spacing: 5px; 
           }
-          .is-open .slice-1 { transform: translateY(-70px) scale(1.02); }
-          .is-open .slice-3 { transform: translateY(70px) scale(1.02); }
+          .is-open .slice-1 { transform: translateY(-15px) scale(1.02); }
+          .is-open .slice-3 { transform: translateY(15px) scale(1.02); }
         }
 
         @media (max-width: 360px) {
@@ -505,7 +505,7 @@ export default function MenuSection() {
             width: 92vw;
           }
           .card-label { 
-            font-size: 1.8rem; 
+            font-size: 2rem; 
             letter-spacing: 4px; 
           }
         }
