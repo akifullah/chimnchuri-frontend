@@ -143,6 +143,22 @@ export default function CheckoutPage() {
         }
     };
 
+    // Handle react-hook-form validation errors
+    const onFormError = (formErrors) => {
+        const errorMessages = [];
+        if (formErrors.full_name) errorMessages.push("Full name is required");
+        if (formErrors.email) errorMessages.push("Email is required");
+        if (formErrors.phone) errorMessages.push("Phone number is required");
+        if (formErrors.street_address) errorMessages.push("Street address is required");
+        if (formErrors.city) errorMessages.push("City is required");
+
+        if (errorMessages.length > 0) {
+            toast.error(errorMessages[0]);
+        } else {
+            toast.error("Please fill in all required fields");
+        }
+    };
+
     const handlePlaceOrder = async (data) => {
 
         // Check delivery zone for delivery orders
@@ -375,7 +391,7 @@ export default function CheckoutPage() {
                                             disabled={isSearchingPostcodes || isCheckingDelivery || !postcodeInput.trim()}
                                             className="px-4 sm:px-6 py-3 sm:py-3.5 bg-brand hover:bg-green-700 disabled:bg-zinc-700 disabled:text-zinc-500 text-white font-bold text-xs sm:text-sm rounded-lg sm:rounded-xl
                                                 transition-all duration-300 flex items-center gap-1.5 sm:gap-2 shrink-0 cursor-pointer disabled:cursor-not-allowed
-                                                shadow-lg shadow-brand/20 hover:shadow-brand/30"
+                                                shadow-lg"
                                         >
                                             {isSearchingPostcodes ? (
                                                 <><FaSpinner className="animate-spin" size={12} /> Searching...</>
@@ -669,10 +685,10 @@ export default function CheckoutPage() {
 
                             {isCodEnabled || !!isOnlineEnabled ? (
                                 <button
-                                    onClick={handleSubmit(handlePlaceOrder)}
-                                    disabled={allocatedTotal !== totalCartQty || loading || (orderType === 'delivery' && (!deliveryChecked || isOutOfRange))}
-                                    className={`group w-full flex items-center justify-center gap-3 py-4.5 font-bold rounded-2xl transition-all duration-300 cursor-pointer
-                                    ${allocatedTotal === totalCartQty
+                                    onClick={handleSubmit(handlePlaceOrder, onFormError)}
+                                    disabled={loading}
+                                    className={`group w-full flex items-center justify-center gap-3 py-4.5 font-bold rounded-xl sm:rounded-2xl text-sm sm:text-base transition-all duration-300 cursor-pointer
+                                    ${!loading
                                             ? 'hover:bg-brand bg-green-700 text-white'
                                             : 'bg-white/5 text-zinc-500 cursor-not-allowed border border-white/5'}`}
                                 >
