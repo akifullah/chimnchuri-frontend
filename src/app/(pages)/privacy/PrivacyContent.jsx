@@ -60,7 +60,7 @@ const PrivacyContent = () => {
 
                     <div className="p-8 rounded-3xl bg-brand/5 border border-brand/10 text-center">
                         <p className="text-zinc-300 text-sm">
-                            Need more details? Reach us at <a href="mailto:privacy@chimnchurri.com" className="text-brand hover:underline font-bold">privacy@chimnchurri.com</a>
+                            Need more details? Reach us at <a href="mailto:info@chimnchurri.com" className="text-brand hover:underline font-bold">info@chimnchurri.com</a>
                         </p>
                     </div>
                 </div>

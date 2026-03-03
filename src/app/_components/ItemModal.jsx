@@ -181,17 +181,17 @@ const ItemModal = () => {
             <div className={`w-4xl max-w-[95vw] rounded-3xl bg-[#1a1a1a] text-white transition-all duration-400 flex flex-col max-h-[90vh] shadow-2xl shadow-black/50 border border-white/[0.06] ${isModalOpen ? "scale-100 translate-y-0" : "scale-95 translate-y-4"}`}>
 
                 {/* HEADER */}
-                <div className="px-6 py-4 flex items-center justify-between shrink-0 border-b border-white/[0.06]">
-                    <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-brand/15 flex items-center justify-center shrink-0">
-                            <FaShoppingBag className="text-brand" size={14} />
+                <div className="px-4 py-3 sm:px-6 sm:py-4 flex items-center justify-between shrink-0 border-b border-white/[0.06]">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-brand/15 flex items-center justify-center shrink-0">
+                            <FaShoppingBag className="text-brand" size={12} />
                         </div>
-                        <h2 className='text-lg font-bold truncate'>{data?.name}</h2>
+                        <h2 className='text-base sm:text-lg font-bold truncate'>{data?.name}</h2>
                     </div>
                     <button
                         onClick={() => dispatch(closeItemModal())}
-                        className='size-9 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer transition-all duration-300'>
-                        <FaTimes size={16} />
+                        className='size-8 sm:size-9 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer transition-all duration-300'>
+                        <FaTimes size={14} />
                     </button>
                 </div>
 
@@ -219,24 +219,24 @@ const ItemModal = () => {
                         </div>
 
                         {/* DETAILS */}
-                        <div className="flex-1 space-y-5 p-5 sm:p-6 pb-24 sm:pb-6">
+                        <div className="flex-1 space-y-3 sm:space-y-5 p-3 sm:p-6 pb-24 sm:pb-6">
                             {/* Description */}
                             {data?.description && (
-                                <p className='text-sm text-zinc-300 leading-relaxed'>{data.description}</p>
+                                <p className='text-xs sm:text-sm text-zinc-300 leading-relaxed'>{data.description}</p>
                             )}
 
                             {/* SIZES */}
                             {data?.sizes?.length > 0 && (
                                 <div>
-                                    <h3 className='text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-3'>Select Size</h3>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <h3 className='text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2 sm:mb-3'>Select Size</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
                                         {data.sizes.map((size) => {
                                             const isActive = selectedSize.id === size.id;
                                             return (
                                                 <label
                                                     key={size.id}
                                                     className={`
-                                                        relative flex items-center justify-between px-2 py-3 capitalize rounded-xl cursor-pointer
+                                                        relative flex items-center justify-between px-2 py-2 sm:py-3 capitalize rounded-xl cursor-pointer
                                                         transition-all duration-300 border
                                                         ${isActive
                                                             ? 'border-brand bg-brand/10 shadow-sm shadow-brand/10'
@@ -246,14 +246,14 @@ const ItemModal = () => {
                                                 >
                                                     <div className="flex items-center gap-1">
                                                         <div className={`
-                                                            w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-all duration-300
+                                                            w-4 h-4 sm:w-[18px] sm:h-[18px] rounded-full border-2 flex items-center justify-center transition-all duration-300
                                                             ${isActive ? 'border-brand bg-brand' : 'border-zinc-600'}
                                                         `}>
-                                                            {isActive && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                            {isActive && <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white" />}
                                                         </div>
-                                                        <span className={`font-medium text-sm ${isActive ? 'text-white' : 'text-zinc-300'}`}>{size.name}</span>
+                                                        <span className={`font-medium text-xs sm:text-sm ${isActive ? 'text-white' : 'text-zinc-300'}`}>{size.name}</span>
                                                     </div>
-                                                    <Price amount={size.price} className={`text-xs ${isActive ? 'text-white' : ''}`} />
+                                                    <Price amount={size.price} className={`text-[11px] sm:text-xs ${isActive ? 'text-white' : ''}`} />
                                                     <input
                                                         type="radio"
                                                         name="size"
@@ -271,7 +271,7 @@ const ItemModal = () => {
 
                             {/* ADD-ONS */}
                             {addon_groups?.length > 0 && (
-                                <div className="space-y-5">
+                                <div className="space-y-3 sm:space-y-5">
                                     {addon_groups.map((group) => {
                                         const groupQtys = selectedAddons[group.id] || {};
                                         const groupCount = Object.values(groupQtys).reduce((sum, q) => sum + q, 0);
@@ -285,10 +285,10 @@ const ItemModal = () => {
                                             : (groupCount > 0 && groupCount < minQty);
 
                                         return (
-                                            <div key={group.id} className={`rounded-2xl p-4 transition-all duration-300 ${hasError ? 'bg-red-500/5 ring-1 ring-red-500/20' : 'bg-white/[0.02]'}`}>
-                                                <div className="flex items-center justify-between mb-3">
+                                            <div key={group.id} className={`rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all duration-300 ${hasError ? 'bg-red-500/5 ring-1 ring-red-500/20' : 'bg-white/[0.02]'}`}>
+                                                <div className="flex items-center justify-between mb-2 sm:mb-3">
                                                     <div>
-                                                        <h4 className='text-xs font-semibold uppercase tracking-wider text-zinc-500 flex items-center gap-2'>
+                                                        <h4 className='text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5 sm:gap-2'>
                                                             {group.addon_category?.name}
                                                             {isRequired ? (
                                                                 <span className='text-[10px] font-bold text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-md uppercase'>Required</span>
@@ -320,7 +320,7 @@ const ItemModal = () => {
                                                     <p className="text-xs text-red-400 mb-2">⚠ {group.selection_type === 'single' ? `Please select a ${group.addon_category?.name || 'option'}` : `Select 0 or at least ${minQty} item(s)`}</p>
                                                 )}
 
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
                                                     {group.items?.map((addon) => {
                                                         const addonQty = (groupQtys[addon.id] || 0);
                                                         const isSelected = addonQty > 0;
@@ -336,7 +336,7 @@ const ItemModal = () => {
                                                                     key={addon.id}
                                                                     onClick={() => isSelected ? handleAddonChange(group, addon.id, -1) : handleAddonChange(group, addon.id, 1)}
                                                                     className={`
-                                                                    flex items-center gap-3 px-3 py-2.5 rounded-xl border cursor-pointer
+                                                                    flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl border cursor-pointer
                                                                     transition-all duration-300
                                                                     ${isSelected
                                                                             ? 'border-brand bg-brand/10 shadow-sm shadow-brand/5'
@@ -345,22 +345,22 @@ const ItemModal = () => {
                                                                 `}
                                                                 >
                                                                     <div className={`
-                                                                    w-[18px] h-[18px] shrink-0 flex items-center justify-center
+                                                                    w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0 flex items-center justify-center
                                                                     transition-all duration-300 border-2 rounded-full
                                                                     ${isSelected ? 'bg-brand border-brand' : 'border-zinc-500 bg-transparent'}
                                                                 `}>
-                                                                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                                        {isSelected && <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white" />}
                                                                     </div>
 
                                                                     {addon.addon_item?.image && (
-                                                                        <Img src={addon.addon_item.image} alt="" className="w-8 h-8 rounded-lg object-cover bg-zinc-700 shrink-0" />
+                                                                        <Img src={addon.addon_item.image} alt="" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover bg-zinc-700 shrink-0" />
                                                                     )}
 
                                                                     <div className="flex-1 min-w-0">
-                                                                        <p className={`text-sm font-medium truncate ${isSelected ? 'text-white' : 'text-zinc-300'}`}>{addon.addon_item?.name}</p>
+                                                                        <p className={`text-xs sm:text-sm font-medium truncate ${isSelected ? 'text-white' : 'text-zinc-300'}`}>{addon.addon_item?.name}</p>
                                                                     </div>
 
-                                                                    <span className={`text-xs whitespace-nowrap font-medium ${isSelected ? 'text-brand' : 'text-zinc-400'}`}>
+                                                                    <span className={`text-[11px] sm:text-xs whitespace-nowrap font-medium ${isSelected ? 'text-brand' : 'text-zinc-400'}`}>
                                                                         + {symbol} {addonPrice}
                                                                     </span>
                                                                 </label>
@@ -372,7 +372,7 @@ const ItemModal = () => {
                                                             <div
                                                                 key={addon.id}
                                                                 className={`
-                                                                flex items-center gap-3 px-3 py-2.5 rounded-xl border
+                                                                flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl border
                                                                 transition-all duration-300
                                                                 ${isSelected
                                                                         ? 'border-brand bg-brand/10 shadow-sm shadow-brand/5'
@@ -381,11 +381,11 @@ const ItemModal = () => {
                                                             `}
                                                             >
                                                                 {addon.addon_item?.image && (
-                                                                    <Img src={addon.addon_item.image} alt="" className="w-8 h-8 rounded-lg object-cover bg-zinc-700 shrink-0" />
+                                                                    <Img src={addon.addon_item.image} alt="" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover bg-zinc-700 shrink-0" />
                                                                 )}
 
                                                                 <div className="flex-1 min-w-0">
-                                                                    <p className={`text-sm font-medium truncate ${isSelected ? 'text-white' : 'text-zinc-300'}`}>{addon.addon_item?.name}</p>
+                                                                    <p className={`text-xs sm:text-sm font-medium truncate ${isSelected ? 'text-white' : 'text-zinc-300'}`}>{addon.addon_item?.name}</p>
                                                                     <span className={`text-[11px] whitespace-nowrap font-medium ${isSelected ? 'text-brand' : 'text-zinc-500'}`}>
                                                                         {symbol} {addonPrice} each
                                                                     </span>
@@ -396,18 +396,18 @@ const ItemModal = () => {
                                                                         type="button"
                                                                         onClick={() => handleAddonChange(group, addon.id, -1)}
                                                                         disabled={addonQty <= 0}
-                                                                        className="w-7 h-7 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-l-lg transition-all duration-300 cursor-pointer disabled:opacity-30"
+                                                                        className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-l-lg transition-all duration-300 cursor-pointer disabled:opacity-30"
                                                                     >
-                                                                        <FaMinus size={8} />
+                                                                        <FaMinus size={7} />
                                                                     </button>
-                                                                    <span className="w-6 text-center text-xs font-bold text-white select-none">{addonQty}</span>
+                                                                    <span className="w-5 sm:w-6 text-center text-[11px] sm:text-xs font-bold text-white select-none">{addonQty}</span>
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => handleAddonChange(group, addon.id, 1)}
                                                                         disabled={isMaxReached && !isSelected}
-                                                                        className="w-7 h-7 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-r-lg transition-all duration-300 cursor-pointer disabled:opacity-30"
+                                                                        className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-r-lg transition-all duration-300 cursor-pointer disabled:opacity-30"
                                                                     >
-                                                                        <FaPlus size={8} />
+                                                                        <FaPlus size={7} />
                                                                     </button>
                                                                 </div>
                                                             </div>
@@ -424,38 +424,38 @@ const ItemModal = () => {
                 </div>
 
                 {/* FOOTER */}
-                <div className="border-t border-white/[0.06] p-4 sm:p-5 shrink-0 bg-[#141414]  rounded-b-3xl">
+                <div className="border-t border-white/[0.06] p-3 sm:p-5 shrink-0 bg-[#141414]  rounded-b-3xl">
                     {validationError && (
-                        <div className="mb-3 text-sm font-medium text-center py-2.5 px-4 rounded-xl bg-red-500/10 border border-red-500/15 text-red-400">
+                        <div className="mb-2 sm:mb-3 text-xs sm:text-sm font-medium text-center py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl bg-red-500/10 border border-red-500/15 text-red-400">
                             {validationError}
                         </div>
                     )}
 
-                    <div className="flex gap-3 items-center max-w-lg mx-auto">
+                    <div className="flex gap-2 sm:gap-3 items-center max-w-lg mx-auto">
                         {/* Quantity Stepper */}
-                        <div className="flex items-center bg-white/[0.05] border border-white/[0.08] rounded-xl h-12 shrink-0">
+                        <div className="flex items-center bg-white/[0.05] border border-white/[0.08] rounded-xl h-10 sm:h-12 shrink-0">
                             <button
                                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                className="w-11 h-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-l-xl transition-all duration-300 cursor-pointer"
+                                className="w-9 sm:w-11 h-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-l-xl transition-all duration-300 cursor-pointer"
                             >
-                                <FaMinus size={11} />
+                                <FaMinus size={10} />
                             </button>
-                            <span className="w-10 text-center font-bold text-base text-white select-none">{quantity}</span>
+                            <span className="w-8 sm:w-10 text-center font-bold text-sm sm:text-base text-white select-none">{quantity}</span>
                             <button
                                 onClick={() => setQuantity(quantity + 1)}
-                                className="w-11 h-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-r-xl transition-all duration-300 cursor-pointer"
+                                className="w-9 sm:w-11 h-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-r-xl transition-all duration-300 cursor-pointer"
                             >
-                                <FaPlus size={11} />
+                                <FaPlus size={10} />
                             </button>
                         </div>
 
                         {/* Add to Cart Button */}
                         <button
                             onClick={handleAddToCart}
-                            className="flex-1 h-12 rounded-xl bg-brand hover:bg-green-700 active:bg-green-800 text-white font-bold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg shadow-brand/20 hover:shadow-brand/30 cursor-pointer"
+                            className="flex-1 h-10 sm:h-12 rounded-xl bg-brand hover:bg-green-700 active:bg-green-800 text-white font-bold transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3 shadow-lg shadow-brand/20 hover:shadow-brand/30 cursor-pointer text-xs sm:text-base"
                         >
                             <span>Add to Order</span>
-                            <span className=" px-3 py-1 rounded-lg text-sm font-semibold">{symbol} {calculateTotalPrice()}</span>
+                            <span className="px-1  sm:px-3 py-0.5 sm:py-1 whitespace-nowrap rounded-lg text-xs sm:text-sm font-semibold">{symbol} {calculateTotalPrice()}</span>
                         </button>
                     </div>
                 </div>

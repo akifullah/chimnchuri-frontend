@@ -151,7 +151,7 @@ const SidebarCart = () => {
                                                                     const addonQty = addon.qty || 1;
                                                                     return (
                                                                         <span key={`${addon.id}-${idx}`} className="text-zinc-400">
-                                                                            + {addonQty > 1 ? `${addonQty}x ` : ''}{addon.name} <span className="text-zinc-500">({symbol} {(addonPrice * addonQty).toFixed(2)})</span>
+                                                                            + {addonQty}x {addon.name} <span className="text-zinc-500">({symbol} {(addonPrice * addonQty).toFixed(2)})</span>
                                                                         </span>
                                                                     );
                                                                 })}

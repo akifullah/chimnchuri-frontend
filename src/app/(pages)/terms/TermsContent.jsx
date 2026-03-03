@@ -47,7 +47,7 @@ const TermsContent = () => {
                         {
                             icon: <FaUndoAlt />,
                             title: "5. Cancellations & Refunds",
-                            content: "Once an order has been confirmed and is being prepared, cancellations may not be possible. If you need to cancel, please contact us as soon as possible. Refunds are issued at our discretion and may depend on the stage of preparation. Any refund approved will be processed within 5–10 working days back to the original payment method."
+                            content: "Late cancellations made with less than 18 hours' notice are non-refundable. Cancellations made with more than 24 hours' notice may be eligible for a refund at our discretion. No refunds will be issued for no-shows, and once preparation for an order has begun, refunds cannot be offered.\n\nIf you experience any issues with your order, please contact us by sending a direct message on Instagram or TikTok to @chimnchurri with your full name, the email address used for the order, and details of your query, as this is our preferred method of communication.\n\nIf you are unable to contact us via these platforms, please send a text message including your full name, email address, and details of your query to 07451221187."
                         },
                         {
                             icon: <FaClock />,
@@ -62,12 +62,12 @@ const TermsContent = () => {
                         {
                             icon: <FaStore />,
                             title: "8. Nature of the Business",
-                            content: "Chim 'N' Churri is a food service business specialising in chimichurri-based dishes, steaks, and related food products. We operate via online ordering for delivery and collection. All food is freshly prepared and cooked on the day of your order."
+                            content: "DUE TO THE NATURE OF OUR BUSINESS AND THE HIGH COST OF STEAK PRODUCTS, WE ARE UNABLE TO ABSORB LOSSES RESULTING FROM LATE CANCELLATIONS, NO-SHOWS, UNPAID ORDERS, OR FOOD WASTE. THESE POLICIES ARE IN PLACE TO PROTECT THE BUSINESS AND ENSURE FAIRNESS TO ALL CUSTOMERS"
                         },
                         {
                             icon: <FaExclamationTriangle />,
                             title: "9. Allergen & Dietary Notice",
-                            content: "Our food may contain or come into contact with common allergens, including but not limited to: nuts, peanuts, gluten, dairy, eggs, soy, sesame, and shellfish. We prepare our food in a shared kitchen environment, so cross-contamination is possible. If you have any food allergies or dietary requirements, please inform us before placing your order. While we take all reasonable precautions, we cannot guarantee that any item is completely free from allergens."
+                            content: "Our food may contain or come into contact with common allergens, including but not limited to nuts, peanuts, gluten, dairy, eggs, soy, sesame, and shellfish. All food is prepared in a shared kitchen environment, which means cross-contamination is possible.\n\nIf you have any food allergies, intolerances, or specific dietary requirements, you must inform us before placing your order. While every reasonable precaution is taken to minimise risk, Chim 'N' Churri cannot guarantee that any item is completely free from allergens and accepts no legal responsibility for allergic reactions where prior notice has not been given.\n\nFor any allergen-related enquiries before placing an order, please contact us via direct message on Instagram or TikTok at @chimnchurri, or email info@chimnchurri.com, including your full name, email address, and details of your requirements. These are our preferred methods of contact."
                         }
                     ].map((section, idx) => (
                         <section key={idx} className="bg-white/[0.03] border border-white/10 p-8 rounded-3xl backdrop-blur-sm hover:bg-white/[0.05] transition-all group">
@@ -85,7 +85,7 @@ const TermsContent = () => {
 
                     <div className="p-8 rounded-3xl bg-brand/5 border border-brand/10 text-center">
                         <p className="text-zinc-300 text-sm">
-                            Questions about our Terms? Contact us at <a href="mailto:legal@chimnchurri.com" className="text-brand hover:underline font-bold">legal@chimnchurri.com</a>
+                            Questions about our Terms? Contact us at <a href="mailto:info@chimnchurri.com" className="text-brand hover:underline font-bold">info@chimnchurri.com</a>
                         </p>
                     </div>
                 </div>

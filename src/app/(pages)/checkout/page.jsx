@@ -341,7 +341,7 @@ export default function CheckoutPage() {
                             </div>
                             {
                                 orderType === 'collection' && (
-                                    <p className="text-[10px] sm:text-xs text-zinc-400 mt-3 sm:mt-5">You can collect your order from our store at <span className="text-white">{settings?.address}, {settings?.postcode}, {settings?.city}</span> </p>
+                                    <p className="text-[10px] sm:text-xs text-zinc-400 mt-3 sm:mt-5">You can collect your order from our store at <span className="text-white">{settings?.address}, {settings?.city}</span> </p>
                                 )
                             }
                         </section>
@@ -539,13 +539,16 @@ export default function CheckoutPage() {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 gap-2 sm:gap-3">
+                                    <div className="grid grid-cols-1 gap-1 sm:gap-2">
                                         {timeSlotsLoading ? (
-                                            <div className="text-zinc-500 text-xs sm:text-sm animate-pulse">Loading time slots...</div>
+                                            <div className="flex flex-col items-center justify-center py-10 space-y-3">
+                                                <div className="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+                                                <div className="text-zinc-500 text-xs sm:text-sm animate-pulse">Loading time slots...</div>
+                                            </div>
                                         ) : timeSlots?.data?.map((slot) => {
-                                            if (slot?.disabled) return;
+                                            // if (slot?.disabled) return;
                                             return (
-                                                <div key={slot.id} className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl border transition-all ${slot.disabled ? 'opacity-50 grayscale' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}>
+                                                <div key={slot.id} className={`flex items-center gap-3 sm:gap-4 ps-3 py-1 px-2 sm:px-2 rounded-sm sm:rounded-lg border transition-all ${slot.disabled ? 'opacity-50 grayscale' : 'bg-white/[0.02] border-white/5 hover:border-white/10'}`}>
                                                     <div className="flex-1">
                                                         <div className="text-xs sm:text-sm font-bold text-white">{slot.start_time}</div>
                                                         <div className="text-[9px] sm:text-[10px] text-zinc-300 uppercase tracking-widest mt-0.5">{slot.max_capacity} {slot.max_capacity === 1 ? 'steak' : 'steaks'} left</div>
@@ -743,7 +746,7 @@ export default function CheckoutPage() {
                                                 <div className="mt-2 sm:mt-3 text-[9px] sm:text-[10px] space-y-0.5">
                                                     {item.selectedAddons.map((addon, aIdx) => (
                                                         <div key={aIdx} className="flex justify-between text-zinc-300">
-                                                            <span>+ {addon.qty > 1 ? `${addon.qty}x ` : ''}{addon.name}</span>
+                                                            <span>+ {addon.qty}x {addon.name}</span>
                                                             <span className="text-zinc-300 ml-2">{symbol} {(parseFloat(addon.price) * addon.qty).toFixed(2)}</span>
                                                         </div>
                                                     ))}

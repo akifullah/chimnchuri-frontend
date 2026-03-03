@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { FaUtensils, FaHeart, FaAward, FaHistory, FaLeaf, FaUsers } from 'react-icons/fa';
+import { FaUtensils, FaHeart, FaAward, FaLeaf, FaSeedling, FaFire } from 'react-icons/fa';
 import Link from 'next/link';
 
 const AboutContent = () => {
@@ -16,64 +16,83 @@ const AboutContent = () => {
 
                 <div className="max-w-7xl mx-auto relative z-10 text-center">
                     <h1 className="text-4xl md:text-5xl font-black mb-6 tracking-tight">
-                        Our <span className="text-brand">Flavors</span>, <br />
-                        Your <span className="text-brand">Memories</span>
+                        About <span className="text-brand">Us</span>
                     </h1>
-                    <p className="max-w-xl mx-auto text-zinc-400 text-base md:text-lg leading-relaxed text-zinc-400/80">
-                        At Chim &apos;N&apos; Churri, we don&apos;t just serve food; we craft experiences.
-                        Every dish is a testament to our commitment to quality, authenticity, and the art of seasoning.
+                    <p className="max-w-2xl mx-auto text-zinc-400 text-base md:text-lg leading-relaxed text-zinc-400/80">
+                        Chim &apos;N&apos; Churri was created to bring premium, flavour-packed steak and sides to Oldham
+                        and the wider North West — food made with care, quality, and attention to detail.
                     </p>
                 </div>
             </section>
 
-            {/* Our Story & Mission */}
+            {/* Our Story */}
             <section className="py-20 px-4">
-                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                    <div className="space-y-8">
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] font-bold tracking-wider uppercase">
-                            <FaHistory size={12} /> Our Story
+                <div className="max-w-4xl mx-auto space-y-16">
+                    {/* Origin */}
+                    <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-8 md:p-12 backdrop-blur-sm relative overflow-hidden">
+                        <div className="absolute -top-6 -right-6 size-32 bg-brand/20 blur-3xl rounded-full" />
+                        <div className="relative z-10 space-y-6">
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] font-bold tracking-wider uppercase">
+                                <FaHeart size={12} /> Our Beginning
+                            </div>
+                            <h2 className="text-2xl md:text-3xl font-bold leading-tight">
+                                From a <span className="text-brand">Family Kitchen</span> to Your Table
+                            </h2>
+                            <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
+                                Launched in September 2025 from a home family kitchen, Chim &apos;N&apos; Churri began with a simple
+                                vision: to offer something different to the local community, with the long-term goal of opening
+                                a physical store in the near future.
+                            </p>
                         </div>
-                        <h2 className="text-2xl md:text-3xl font-bold leading-tight">
-                            Born from a <span className="text-brand">Passion</span> for Authentic Tastes
-                        </h2>
-                        <div className="space-y-4 text-zinc-400 text-sm leading-relaxed">
-                            <p>
-                                Chim &apos;N&apos; Churri began with a simple idea: that great food should be bold, fresh, and unforgettable.
-                                Our journey started in a small family kitchen, where the secret recipes of our signature chimichurri
-                                sauces were first perfected.
-                            </p>
-                            <p>
-                                Today, we bring those same authentic flavors to your table, combining traditional methods
-                                with modern culinary techniques to create something truly unique in the world of gastronomy.
-                            </p>
+                    </div>
+
+                    {/* The Food */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-8 backdrop-blur-sm relative overflow-hidden">
+                            <div className="absolute -bottom-6 -left-6 size-32 bg-brand/20 blur-3xl rounded-full" />
+                            <div className="relative z-10 space-y-4">
+                                <div className="size-12 rounded-xl bg-brand/10 flex items-center justify-center text-brand">
+                                    <FaUtensils size={20} />
+                                </div>
+                                <h3 className="text-xl font-bold">Carefully Crafted <span className="text-brand">Menu</span></h3>
+                                <p className="text-zinc-400 text-sm leading-relaxed">
+                                    Every item on the menu has been carefully developed. The creamy mash delivers the perfect buttery
+                                    texture, while the seasoned fries are bold, flavourful, and addictive. No shortcuts and no
+                                    low-quality ingredients — just consistently great food.
+                                </p>
+                            </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 pt-4">
-                            <div className="bg-white/[0.03] border border-white/10 p-5 rounded-2xl backdrop-blur-sm">
-                                <div className="text-brand text-2xl font-black mb-1">10+</div>
-                                <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Years of Flavor</div>
-                            </div>
-                            <div className="bg-white/[0.03] border border-white/10 p-5 rounded-2xl backdrop-blur-sm">
-                                <div className="text-brand text-2xl font-black mb-1">50k+</div>
-                                <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Happy Guests</div>
+                        <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-8 backdrop-blur-sm relative overflow-hidden">
+                            <div className="absolute -top-6 -right-6 size-32 bg-brand/20 blur-3xl rounded-full" />
+                            <div className="relative z-10 space-y-4">
+                                <div className="size-12 rounded-xl bg-brand/10 flex items-center justify-center text-brand">
+                                    <FaSeedling size={20} />
+                                </div>
+                                <h3 className="text-xl font-bold">Signature <span className="text-brand">Sauces</span></h3>
+                                <p className="text-zinc-400 text-sm leading-relaxed">
+                                    The signature mushroom peppercorn sauce is rich, creamy, and full of flavour, crafted to stand
+                                    apart from ordinary sauces. Chimichurri is equally distinctive, using a unique blend of herbs
+                                    and seasonings to create a smoother, premium finish.
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="relative">
-                        <div className="aspect-[1/1] rounded-[40px] overflow-hidden border border-white/10 bg-zinc-900 flex items-center justify-center p-8">
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent opacity-60" />
-                            <div className="text-center relative z-10">
-                                <FaUtensils size={80} className="text-brand/20 mx-auto mb-6" />
-                                <h3 className="text-2xl font-bold mb-4">Crafting the Perfect Bite</h3>
-                                <p className="text-zinc-400 text-sm">
-                                    Every ingredient we use is ethically sourced and hand-picked for peak freshness.
-                                </p>
-                            </div>
-                            {/* Decorative elements */}
-                            <div className="absolute -top-6 -right-6 size-32 bg-brand/20 blur-3xl rounded-full" />
-                            <div className="absolute -bottom-6 -left-6 size-32 bg-brand/20 blur-3xl rounded-full" />
+                    {/* Commitment */}
+                    <div className="text-center space-y-6 max-w-2xl mx-auto">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] font-bold tracking-wider uppercase">
+                            <FaFire size={12} /> Our Promise
                         </div>
+                        <p className="text-zinc-400 text-base md:text-lg leading-relaxed">
+                            From steaks to sides and sauces, every plate reflects the same commitment: tender, flavourful,
+                            high-quality food served fresh, every time.
+                        </p>
+                        <p className="text-xl md:text-2xl font-bold">
+                            Chim &apos;N&apos; Churri stands for <span className="text-brand">passion</span>,{' '}
+                            <span className="text-brand">care</span>, and <span className="text-brand">flavour</span> —
+                            delivered with every bite.
+                        </p>
                     </div>
                 </div>
             </section>
@@ -90,18 +109,18 @@ const AboutContent = () => {
                         {[
                             {
                                 icon: <FaLeaf />,
-                                title: "Fresh & Natural",
-                                desc: "No artificial flavors or weird chemicals. Only the freshest herbs, spices, and premium meats."
+                                title: "No Shortcuts",
+                                desc: "No low-quality ingredients, no cutting corners. Every dish is made with premium, carefully sourced produce."
                             },
                             {
                                 icon: <FaHeart />,
-                                title: "Made with Love",
-                                desc: "Every order is prepared with the same care we give to our own family meals."
+                                title: "Made with Care",
+                                desc: "Born from a family kitchen, every order is prepared with the same love and attention we give to our own meals."
                             },
                             {
                                 icon: <FaAward />,
-                                title: "Quality First",
-                                desc: "We никогда (never) compromise on quality. If it's not perfect, it doesn't leave our kitchen."
+                                title: "Premium Quality",
+                                desc: "From tender steaks to our signature sauces, we deliver consistently great food — fresh, every single time."
                             }
                         ].map((value, idx) => (
                             <div key={idx} className="bg-white/[0.04] backdrop-blur-xl border border-white/10 p-6 rounded-2xl hover:bg-white/[0.06] transition-all group">
@@ -140,3 +159,4 @@ const AboutContent = () => {
 };
 
 export default AboutContent;
+

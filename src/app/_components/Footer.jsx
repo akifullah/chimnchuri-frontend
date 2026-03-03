@@ -35,7 +35,7 @@ const Footer = () => {
                         <h3 className='text-xl lg:text-2xl font-bold mb-2 md:mb-4'>Address</h3>
                         <ul>
                             <li className=''>
-                                <p className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-black transition ease duration-200 inline-block'>{settings?.address}, {settings?.city}, {settings?.state}, {settings?.postcode}</p>
+                                <p className='text-sm md:text-md mb-1 md:mb-2 text-white/80 hover:text-black transition ease duration-200 inline-block'>{settings?.address}, {settings?.city}, {settings?.state}</p>
                             </li>
                             <li className=''>
                                 <Link className='text-sm break-all md:text-md mb-1 md:mb-2 text-white/80 hover:text-black transition ease duration-200 inline-block' href={`mailto:${settings?.email}`}>{settings?.email}</Link>

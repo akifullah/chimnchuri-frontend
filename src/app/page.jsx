@@ -37,8 +37,7 @@ export default function Home() {
                 The <span className="text-brand">Chim &apos;N&apos; Churri</span> Story
               </h2>
               <p className="max-w-2xl mx-auto text-zinc-400 text-sm md:text-base leading-relaxed">
-                Born from a passion for bold, authentic flavours — we bring the finest chimichurri-infused
-                dishes straight to your table. Every bite is crafted with love and the freshest ingredients.
+                Born in a home family kitchen, Chim ‘N’ Churri was created with one goal — to bring premium, flavour-packed steak, sides, and signature sauces to Oldham and the wider North West. Every dish is carefully crafted using quality ingredients, with no shortcuts and a commitment to bold, unique, unforgettable flavours.
               </p>
             </div>
 
@@ -57,7 +56,7 @@ export default function Home() {
                 {
                   icon: <FaAward />,
                   title: "Quality First",
-                  desc: "If it&apos;s not perfect, it doesn&apos;t leave our kitchen. That&apos;s the Churrified standard."
+                  desc: "If it's not perfect, it doesn't leave our kitchen. That's the Churrified standard."
                 }
               ].map((value, idx) => (
                 <div key={idx} className="bg-white/[0.03] border border-white/10 p-6 md:p-8 rounded-2xl hover:bg-white/[0.06] transition-all group text-center">
