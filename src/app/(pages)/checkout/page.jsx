@@ -315,7 +315,7 @@ export default function CheckoutPage() {
 
 
     return (
-        <div className="min-h-screen bg-[#141414] py-6 sm:py-12 px-3 sm:px-6 lg:px-8 relative overflow-hidden text-white">
+        <div className="min-h-screen bg-[#141414] py-6 sm:py-12 px-3 sm:px-6 lg:px-8 relative overflow-x-clip text-white">
 
             {loading && <Loader />}
 
@@ -331,7 +331,7 @@ export default function CheckoutPage() {
                     <p className="text-zinc-300 text-xs sm:text-sm">Complete your order with secure {orderType} and payment</p>
                 </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start relative">
                     {/* Left Column: Forms */}
                     <div className="lg:col-span-8 space-y-5 sm:space-y-8 order-2 lg:order-1">
 
@@ -671,6 +671,105 @@ export default function CheckoutPage() {
                             </div>
                         </section>
 
+                        <section className="lg:hidden">
+                            <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-2 sm:p-3 shadow-2xl">
+                                <h2 className="text-base sm:text-xl font-bold mb-5 sm:mb-8 flex items-center gap-2 sm:gap-3">
+                                    <FaShoppingBag className="text-white" size={14} />
+                                    Order Summary
+                                </h2>
+
+                                <div className="space-y-4 sm:space-y-6 mb-5 sm:mb-8 max-h-[350px] sm:max-h-[450px] overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
+                                    {items.map((item, idx) => (
+                                        <div key={idx} className="flex gap-3 sm:gap-4 group">
+                                            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl bg-zinc-800 border border-white/5 overflow-hidden relative shrink-0">
+                                                {item.image ? (
+                                                    <Img src={item.image} alt={item.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-zinc-500">
+                                                        <FaShoppingBag size={18} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex justify-between items-start gap-2">
+                                                    <div>
+                                                        <h3 className="font-bold text-white text-xs sm:text-sm line-clamp-1 mb-0.5">{item.name}</h3>
+                                                        <p className="text-[10px] sm:text-[12px] text-zinc-200 font-medium">{item.selectedSize.name}</p>
+                                                    </div>
+                                                    <p className="text-xs sm:text-sm font-bold text-zinc-200">{symbol} {item.itemTotal.toFixed(2)}</p>
+                                                </div>
+
+                                                {item.selectedAddons && item.selectedAddons.length > 0 && (
+                                                    <div className="mt-2 sm:mt-3 text-[9px] sm:text-[10px] space-y-0.5">
+                                                        {item.selectedAddons.map((addon, aIdx) => (
+                                                            <div key={aIdx} className="flex justify-between text-zinc-300">
+                                                                <span>+ {addon.qty}x {addon.name}</span>
+                                                                <span className="text-zinc-300 ml-2">{symbol} {(parseFloat(addon.price) * addon.qty).toFixed(2)}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                <div className="mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] font-bold text-zinc-300">Qty: {item.quantity}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="border-t border-white/5 pt-4 sm:pt-6 space-y-2.5 sm:space-y-4">
+                                    <div className="flex justify-between text-xs sm:text-sm text-zinc-300">
+                                        <span>Subtotal</span>
+                                        <span className="text-zinc-200">{symbol} {totalPrice.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs sm:text-sm text-zinc-300">
+                                        <span>Delivery Fee</span>
+                                        {orderType === 'collection' ? (
+                                            <span className="text-green-400 line-through opacity-60">{symbol} {settingsDeliveryFee.toFixed(2)}</span>
+                                        ) : deliveryChecked && deliveryZone ? (
+                                            <span className="text-zinc-200">{symbol} {deliveryZone.delivery_fee.toFixed(2)}</span>
+                                        ) : deliveryChecked && isOutOfRange ? (
+                                            <span className="text-red-400 text-[10px] sm:text-xs">Out of range</span>
+                                        ) : (
+                                            <span className="text-zinc-500 text-[10px] sm:text-xs italic">Enter postcode to check</span>
+                                        )}
+                                    </div>
+
+                                    <div className="flex justify-between text-xs sm:text-sm text-green-500">
+                                        <span>Discount</span>
+                                        <span className="text-green-500">{symbol} {discount.toFixed(2)}</span>
+                                    </div>
+
+                                    <div className="flex justify-between text-xs sm:text-sm text-zinc-300">
+                                        <span>Tax ({tax}%)</span>
+                                        <span className="text-zinc-200">{symbol} {taxAmount.toFixed(2)}</span>
+                                    </div>
+
+                                    <div className="flex justify-between items-center pt-3 sm:pt-4 border-t border-white/10">
+                                        <span className="text-sm sm:text-base font-bold text-white">Total</span>
+                                        <span className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                                            {orderType === 'collection'
+                                                ? `${symbol} ${(totalPrice + taxAmount - discount).toFixed(2)}`
+                                                : deliveryChecked && deliveryZone
+                                                    ? `${symbol} ${grandTotal.toFixed(2)}`
+                                                    : `${symbol} ${(totalPrice + taxAmount - discount).toFixed(2)}` + (orderType === 'delivery' ? ' + delivery' : '')
+                                            }
+                                        </span>
+                                    </div>
+                                    {totalPrice < minOrderAmount && (
+                                        <div className="mt-1.5 sm:mt-2 text-red-500 font-bold text-[10px] sm:text-[12px] text-center">
+                                            Minimum order amount is {symbol} {minOrderAmount.toFixed(2)}
+                                        </div>
+                                    )}
+
+                                </div>
+
+                                <div className="mt-3 sm:mt-4 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl bg-white/[0.02] border border-white/5 text-[9px] sm:text-[10px] text-zinc-400 justify-center uppercase tracking-widest font-bold">
+                                    <FaShieldAlt size={10} />
+                                    <span>Encrypted & Secure</span>
+                                </div>
+                            </div>
+                        </section>
+
                         {/* 2. Payment Method */}
                         <section className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl">
                             <div className="flex items-center gap-2.5 sm:gap-4 mb-5 sm:mb-8">
@@ -789,8 +888,8 @@ export default function CheckoutPage() {
                     </div>
 
                     {/* Right Column: Order Summary */}
-                    <aside className="lg:col-span-4 lg:sticky lg:top-8 order-1 lg:order-2">
-                        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-2 sm:p-3 shadow-2xl">
+                    <aside className="hidden lg:block lg:col-span-4 lg:sticky lg:top-8 lg:self-start order-1 lg:order-2 ">
+                        <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl  sm:rounded-3xl p-2 sm:p-3 shadow-2xl">
                             <h2 className="text-base sm:text-xl font-bold mb-5 sm:mb-8 flex items-center gap-2 sm:gap-3">
                                 <FaShoppingBag className="text-white" size={14} />
                                 Order Summary

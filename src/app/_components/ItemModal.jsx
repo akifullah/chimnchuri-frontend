@@ -330,42 +330,42 @@ const ItemModal = () => {
                                                         let addonPrice = parseFloat(addon.price);
                                                         if (!addonPrice || addonPrice === 0) addonPrice = parseFloat(addon.addon_item?.price) || 0;
 
-                                                        if (group.selection_type === 'single') {
-                                                            return (
-                                                                <label
-                                                                    key={addon.id}
-                                                                    onClick={() => isSelected ? handleAddonChange(group, addon.id, -1) : handleAddonChange(group, addon.id, 1)}
-                                                                    className={`
-                                                                    flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl border cursor-pointer
-                                                                    transition-all duration-300
-                                                                    ${isSelected
-                                                                            ? 'border-brand bg-brand/10 shadow-sm shadow-brand/5'
-                                                                            : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04]'
-                                                                        }
-                                                                `}
-                                                                >
-                                                                    <div className={`
-                                                                    w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0 flex items-center justify-center
-                                                                    transition-all duration-300 border-2 rounded-full
-                                                                    ${isSelected ? 'bg-brand border-brand' : 'border-zinc-500 bg-transparent'}
-                                                                `}>
-                                                                        {isSelected && <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white" />}
-                                                                    </div>
+                                                        // if (group.selection_type === 'single') {
+                                                        //     return (
+                                                        //         <label
+                                                        //             key={addon.id}
+                                                        //             onClick={() => isSelected ? handleAddonChange(group, addon.id, -1) : handleAddonChange(group, addon.id, 1)}
+                                                        //             className={`
+                                                        //             flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl border cursor-pointer
+                                                        //             transition-all duration-300
+                                                        //             ${isSelected
+                                                        //                     ? 'border-brand bg-brand/10 shadow-sm shadow-brand/5'
+                                                        //                     : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04]'
+                                                        //                 }
+                                                        //         `}
+                                                        //         >
+                                                        //             <div className={`
+                                                        //             w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0 flex items-center justify-center
+                                                        //             transition-all duration-300 border-2 rounded-full
+                                                        //             ${isSelected ? 'bg-brand border-brand' : 'border-zinc-500 bg-transparent'}
+                                                        //         `}>
+                                                        //                 {isSelected && <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white" />}
+                                                        //             </div>
 
-                                                                    {addon.addon_item?.image && (
-                                                                        <Img src={addon.addon_item.image} alt="" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover bg-zinc-700 shrink-0" />
-                                                                    )}
+                                                        //             {addon.addon_item?.image && (
+                                                        //                 <Img src={addon.addon_item.image} alt="" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover bg-zinc-700 shrink-0" />
+                                                        //             )}
 
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <p className={`text-xs sm:text-sm font-medium truncate ${isSelected ? 'text-white' : 'text-zinc-300'}`}>{addon.addon_item?.name}</p>
-                                                                    </div>
+                                                        //             <div className="flex-1 min-w-0">
+                                                        //                 <p className={`text-xs sm:text-sm font-medium truncate ${isSelected ? 'text-white' : 'text-zinc-300'}`}>{addon.addon_item?.name}</p>
+                                                        //             </div>
 
-                                                                    <span className={`text-[11px] sm:text-xs whitespace-nowrap font-medium ${isSelected ? 'text-brand' : 'text-zinc-400'}`}>
-                                                                        + {symbol} {addonPrice}
-                                                                    </span>
-                                                                </label>
-                                                            );
-                                                        }
+                                                        //             <span className={`text-[11px] sm:text-xs whitespace-nowrap font-medium ${isSelected ? 'text-brand' : 'text-zinc-400'}`}>
+                                                        //                 + {symbol} {addonPrice}
+                                                        //             </span>
+                                                        //         </label>
+                                                        //     );
+                                                        // }
 
                                                         // Multiple selection with quantity controls
                                                         return (
