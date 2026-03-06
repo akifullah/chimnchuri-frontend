@@ -20,8 +20,8 @@ import useDeliveryZone from "@/hooks/useDeliveryZone";
 
 export default function CheckoutPage() {
 
-    const [orderType, setOrderType] = useState("delivery");
-    const { data: timeSlots, isLoading: timeSlotsLoading, error: timeSlotsError } = useTimeSlots(orderType);
+    const [orderType, setOrderType] = useState("collection");
+    const { data: timeSlots, isLoading: timeSlotsLoading, error: timeSlotsError } = useTimeSlots('delivery');
     const auth = useSelector((state) => state.authSlice);
 
     // Delivery zone hook
@@ -207,8 +207,8 @@ export default function CheckoutPage() {
 
         // Get current form values without triggering HTML validation
         const data = getValues();
-        if (!data.full_name || !data.email) {
-            toast.error("Please fill in your name and email");
+        if (!data.full_name || !data.email || !data.phone) {
+            toast.error("Please fill in your name, email, and phone number");
             return null;
         }
         if (orderType === 'delivery' && !data.street_address) {
@@ -381,7 +381,7 @@ export default function CheckoutPage() {
                                         <FaStore size={12} />
                                     </div>
                                     <div className="text-left">
-                                        <div className="font-bold text-[10px] sm:text-xs">Collection</div>
+                                        <div className="font-bold text-[10px] sm:text-xs">Collection - Kerbside Service</div>
                                         <p className="text-[9px] sm:text-[10px] text-zinc-400">Pick up in store</p>
                                     </div>
                                     {orderType === 'collection' && (
@@ -574,7 +574,7 @@ export default function CheckoutPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                 <InputField label="Full name" name="full_name" placeholder="John Doe" options={{ required: "Name is required" }} />
                                 <InputField label="Email" name="email" placeholder="Email Address" options={{ required: "Email is required" }} />
-                                <InputField label="Phone Number (Optional)" name="phone" placeholder="+44 7700 900000" />
+                                <InputField label="Phone Number" name="phone" placeholder="+44 7700 900000" options={{ required: "Phone number is required" }} />
                                 {orderType === 'delivery' && (
                                     <>
                                         <div className="md:col-span-2">

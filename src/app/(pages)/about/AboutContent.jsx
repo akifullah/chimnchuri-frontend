@@ -55,9 +55,9 @@ const AboutContent = () => {
                                 </div>
                                 <h3 className="text-xl font-bold">Carefully Crafted <span className="text-brand">Menu</span></h3>
                                 <p className="text-zinc-400 text-sm leading-relaxed">
-                                    Every item on the menu has been carefully developed. The creamy mash delivers the perfect buttery
-                                    texture, while the seasoned fries are bold, flavourful, and addictive. No shortcuts and no
-                                    low-quality ingredients — just consistently great food.
+                                    Our steaks are the star of the menu. We use premium quality cuts that are tender, juicy, and full of flavour — no shortcuts and no low-grade meat. Taste it yourself and you’ll know the difference.
+                                    <br />
+                                    Every other item on the menu has been just as carefully developed. The creamy mash delivers the perfect buttery texture, while the seasoned fries are bold, flavourful, and seriously addictive. Just consistently great food made with proper ingredients”
                                 </p>
                             </div>
                         </div>

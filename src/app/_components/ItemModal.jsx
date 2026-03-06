@@ -326,92 +326,51 @@ const ItemModal = () => {
                                                         const isSelected = addonQty > 0;
                                                         const totalGroupQty = groupCount;
                                                         const isMaxReached = group.max_qty && totalGroupQty >= group.max_qty;
+                                                        const isSingle = group.selection_type === 'single';
 
                                                         let addonPrice = parseFloat(addon.price);
                                                         if (!addonPrice || addonPrice === 0) addonPrice = parseFloat(addon.addon_item?.price) || 0;
 
-                                                        // if (group.selection_type === 'single') {
-                                                        //     return (
-                                                        //         <label
-                                                        //             key={addon.id}
-                                                        //             onClick={() => isSelected ? handleAddonChange(group, addon.id, -1) : handleAddonChange(group, addon.id, 1)}
-                                                        //             className={`
-                                                        //             flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl border cursor-pointer
-                                                        //             transition-all duration-300
-                                                        //             ${isSelected
-                                                        //                     ? 'border-brand bg-brand/10 shadow-sm shadow-brand/5'
-                                                        //                     : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04]'
-                                                        //                 }
-                                                        //         `}
-                                                        //         >
-                                                        //             <div className={`
-                                                        //             w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0 flex items-center justify-center
-                                                        //             transition-all duration-300 border-2 rounded-full
-                                                        //             ${isSelected ? 'bg-brand border-brand' : 'border-zinc-500 bg-transparent'}
-                                                        //         `}>
-                                                        //                 {isSelected && <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white" />}
-                                                        //             </div>
-
-                                                        //             {addon.addon_item?.image && (
-                                                        //                 <Img src={addon.addon_item.image} alt="" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover bg-zinc-700 shrink-0" />
-                                                        //             )}
-
-                                                        //             <div className="flex-1 min-w-0">
-                                                        //                 <p className={`text-xs sm:text-sm font-medium truncate ${isSelected ? 'text-white' : 'text-zinc-300'}`}>{addon.addon_item?.name}</p>
-                                                        //             </div>
-
-                                                        //             <span className={`text-[11px] sm:text-xs whitespace-nowrap font-medium ${isSelected ? 'text-brand' : 'text-zinc-400'}`}>
-                                                        //                 + {symbol} {addonPrice}
-                                                        //             </span>
-                                                        //         </label>
-                                                        //     );
-                                                        // }
-
-                                                        // Multiple selection with quantity controls
                                                         return (
-                                                            <div
+                                                            <label
                                                                 key={addon.id}
-                                                                className={`
-                                                                flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl border
-                                                                transition-all duration-300
-                                                                ${isSelected
-                                                                        ? 'border-brand bg-brand/10 shadow-sm shadow-brand/5'
-                                                                        : 'border-white/[0.06] bg-white/[0.02]'
+                                                                onClick={() => {
+                                                                    if (isSelected) {
+                                                                        handleAddonChange(group, addon.id, -1);
+                                                                    } else if (!isMaxReached || isSingle) {
+                                                                        handleAddonChange(group, addon.id, 1);
                                                                     }
-                                                            `}
+                                                                }}
+                                                                className={`
+                                                                    relative flex items-center justify-between px-2 py-2 sm:py-3 capitalize rounded-xl cursor-pointer
+                                                                    transition-all duration-300 border
+                                                                    ${isSelected
+                                                                        ? 'border-brand bg-brand/10 shadow-sm shadow-brand/10'
+                                                                        : `border-white/[0.06] bg-white/[0.03] ${!isMaxReached || isSingle ? 'hover:border-white/[0.12] hover:bg-white/[0.05]' : 'opacity-50 cursor-not-allowed'}`
+                                                                    }
+                                                                `}
                                                             >
-                                                                {addon.addon_item?.image && (
-                                                                    <Img src={addon.addon_item.image} alt="" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover bg-zinc-700 shrink-0" />
-                                                                )}
-
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className={`text-xs sm:text-sm font-medium truncate ${isSelected ? 'text-white' : 'text-zinc-300'}`}>{addon.addon_item?.name}</p>
-                                                                    <span className={`text-[11px] whitespace-nowrap font-medium ${isSelected ? 'text-brand' : 'text-zinc-500'}`}>
-                                                                        {symbol} {addonPrice} each
-                                                                    </span>
+                                                                <div className="flex items-center gap-1">
+                                                                    {isSingle ? (
+                                                                        <div className={`
+                                                                            w-4 h-4 sm:w-[18px] sm:h-[18px] rounded-full border-2 flex items-center justify-center transition-all duration-300 shrink-0
+                                                                            ${isSelected ? 'border-brand bg-brand' : 'border-zinc-600'}
+                                                                        `}>
+                                                                            {isSelected && <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white" />}
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className={`
+                                                                            w-4 h-4 sm:w-[18px] sm:h-[18px] rounded-md border-2 flex items-center justify-center transition-all duration-300 shrink-0
+                                                                            ${isSelected ? 'border-brand bg-brand' : 'border-zinc-600'}
+                                                                        `}>
+                                                                            {isSelected && <FaCheck className="text-white" size={8} />}
+                                                                        </div>
+                                                                    )}
+                                                                    <span className={`font-medium text-[11px] sm:text-xs ${isSelected ? 'text-white' : 'text-zinc-300'}`}>{addon.addon_item?.name}</span>
                                                                 </div>
-
-                                                                <div className="flex items-center bg-white/[0.05] border border-white/[0.08] rounded-lg shrink-0">
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleAddonChange(group, addon.id, -1)}
-                                                                        disabled={addonQty <= 0}
-                                                                        className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-l-lg transition-all duration-300 cursor-pointer disabled:opacity-30"
-                                                                    >
-                                                                        <FaMinus size={7} />
-                                                                    </button>
-                                                                    <span className="w-5 sm:w-6 text-center text-[11px] sm:text-xs font-bold text-white select-none">{addonQty}</span>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleAddonChange(group, addon.id, 1)}
-                                                                        disabled={isMaxReached && !isSelected}
-                                                                        className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-r-lg transition-all duration-300 cursor-pointer disabled:opacity-30"
-                                                                    >
-                                                                        <FaPlus size={7} />
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        )
+                                                                <Price amount={addonPrice} className={`text-[11px] sm:text-xs ${isSelected ? 'text-white' : ''}`} />
+                                                            </label>
+                                                        );
                                                     })}
                                                 </div>
                                             </div>
